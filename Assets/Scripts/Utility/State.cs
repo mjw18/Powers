@@ -8,10 +8,9 @@ public abstract class State {
         Debug.Log("Base class enter");
     }
 
-    public void Execute()
+    virtual public void Execute()
     {
         Debug.Log("Base class execute");
-
     }
 
     public void Exit()

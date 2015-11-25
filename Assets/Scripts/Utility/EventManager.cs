@@ -86,7 +86,8 @@ public class EventManager : MonoBehaviour
         ShakeCamera,
         Test,
         EnemyDied,
-        ChargeHit
+        ChargeHit,
+        LaserHit
     };
 }
 

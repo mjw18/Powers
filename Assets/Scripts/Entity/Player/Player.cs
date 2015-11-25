@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : MonoBehaviour {
-
+public class Player : MonoBehaviour
+{
     public float maxSpeed = 10f;
     public float jumpForce = 100f;
     public int facing = 1;
+
+    public float maxEnergy = 30.0f;
+    public float energyRechargeRate = 3f;
+    public float energy;
 
     public PlayerStateMachine m_StateMachine;
 
@@ -18,7 +22,6 @@ public class Player : MonoBehaviour {
     }
 
     private CircleCollider2D m_groundCheck;
-    private BoxCollider2D m_FrontCheck;
 
     private BoxCollider2D m_collider;
     private Animator m_animController;
@@ -37,8 +40,22 @@ public class Player : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-
+        //Handle player energy for powers
+        energy = Mathf.Clamp(energy + energyRechargeRate * Time.deltaTime, 0.0f, maxEnergy);
 	}
+
+    //Usse player energy, return true if power can be used
+    public bool UseEnergy(float requiredEnergy)
+    {
+        //Not enough energy to use given power
+        if (energy - requiredEnergy < -float.Epsilon)
+            return false;
+
+        //Use required energy return can use
+        energy -= requiredEnergy;
+        return true;
+        
+    }
 
     //use physics checksphere?
     void OnTriggerEnter2D(Collider2D other)

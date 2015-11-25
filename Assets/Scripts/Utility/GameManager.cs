@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour {
 
     void OnLevelWasLoaded()
     {
-        Debug.Log("LoadLevel");
+        Debug.Log("LoadedLevel");
         Init();
     }
 
@@ -99,6 +99,7 @@ public class GameManager : MonoBehaviour {
         EventManager.RegisterListener(EventManager.MessageKey.EnemyDied, deathAction);
     }
 
+    //When an enemyDied message is recieved do this
     void OnEnemyDeath()
     {
         m_KillCount += 1;

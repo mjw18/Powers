@@ -4,10 +4,12 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour {
 
-    public float chargeAttackDistance;
+    public KeyCode primaryPowerKey = KeyCode.E;
+    public KeyCode secondaryPowerKey = KeyCode.R;
+    public Power primaryPower;
+    public Power secondaryPower; 
 
-    public float chargeDamage = 75f;
-    public float chargeForce = 10f;
+    //These Should probably be removed soon
     public float powerUpTime = 0.5f;
     public float powerUpRate = 0.05f;
     public float powerLossRate = 0.01f;
@@ -16,24 +18,57 @@ public class PlayerController : MonoBehaviour {
     public float charging = 0f;
     private bool m_PoweringUp = false;
     private bool m_CanMove = true;
-    private bool m_Charging = false;
+    private bool m_UsingPower = false;
+
+    //Charge Variables
+    public static class ChargeData
+    {
+        public static float chargeAttackDistance;
+        public static float damage = 75f;
+        public static float chargeForce = 10f;
+        public static float energyCost = 15f;
+    }
+
+    //Laser variables
+    public class LaserData
+    {
+        public static float energyCost = 3f;
+        public static float laserRange = 5.0f;
+        public static float laserDamage = 4.0f;
+        public static float laserFirerate = 1.0f;
+        public static Color laserColor = new Color(80, 120, 120);
+    }
 
     public GameObject particles;
 
     public ParticleSystem activeParticles;
     private Player m_Player;
 
-    public Text chargeTimeText;
-    private Color defaultTextColor;
+    public Text chargeTimeText;     //> Delete?
+    private Color defaultTextColor; //> Delete?
 
     private Rigidbody2D m_rigidbody;
     private Collider2D m_Collider;
+    private LineRenderer m_LaserLine;
+    private Regulator m_LaserRegulator;
+    private Transform m_ShootPosition;
 
 	void Awake ()
     {
         m_Player = GetComponent<Player>();
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_Collider = GetComponent<Collider2D>();
+        m_LaserLine = GetComponent<LineRenderer>();
+        m_LaserRegulator = GetComponent<Regulator>();
+        //Change this, put in laser anymway?
+        m_ShootPosition = GameObject.Find("ShootPosition").transform;
+        if(!m_ShootPosition)
+        {
+            Debug.Log("ShootPosition not found");
+        }
+
+        //Dont show laser until fired
+        m_LaserLine.enabled = false;
 
         //Fuck using strings though
         chargeTimeText = GameObject.Find("EnergyText").GetComponent<Text>();
@@ -41,19 +76,20 @@ public class PlayerController : MonoBehaviour {
         {
             Debug.Log("Charge text not set. CHANGE THIS THIS SUCKS");
         }
-        chargeTimeText.text = "Energy: " + chargeTime;
+        //Move this to Player
+        chargeTimeText.text = "Energy: " + m_Player.energy;
 	}
 	
 	// Update is called once per frame
 	void Update ()
     {
-
         //Update text
-        chargeTimeText.text = string.Format("Energy: {0}", (int)charging ); 
+        chargeTimeText.text = string.Format("Energy: {0}", (int)m_Player.energy ); 
 
-        if (particles == null)
+        //Check laser regulator, if true, disable laser vfx (time is up)
+        if(m_LaserRegulator.CheckTimer())
         {
-            Debug.Log("No particles!");
+            DisableLaserVFX();
         }
 
     }
@@ -70,7 +106,26 @@ public class PlayerController : MonoBehaviour {
             MoveManager(horz, jump);
         }
 
-        Flip(horz);
+        if(Input.GetKeyDown(primaryPowerKey))
+        {
+            if( m_Player.UseEnergy( ChargeData.energyCost ) )
+            {
+                if(primaryPower != null)
+                    primaryPower.Execute();
+
+                ChargeAttack();
+            }
+        }
+        else if( Input.GetKeyDown(secondaryPowerKey) )
+        {
+            if (m_Player.UseEnergy(LaserData.energyCost))
+            {
+                if(secondaryPower != null)
+                    secondaryPower.Execute();
+
+                HandLaser();
+            }
+        }
 
         if (Input.GetButton("Fire1"))
         {
@@ -92,7 +147,7 @@ public class PlayerController : MonoBehaviour {
             charging = Mathf.Clamp(charging, 0.0f, powerUpTime);
             Debug.Log("ChargedTime: " + charging);
         }
-        else if(charging >= powerUpTime && !m_Charging && Input.GetButtonUp("Fire1"))
+        else if(charging >= powerUpTime && !m_UsingPower && Input.GetButtonUp("Fire1"))
         {
 
             if (activeParticles != null && activeParticles.isPlaying)
@@ -102,10 +157,10 @@ public class PlayerController : MonoBehaviour {
             m_PoweringUp = false;
             
             ChargeAttack();
-            m_Charging = false;
+            m_UsingPower = false;
             //StartCoroutine("ChargeAttack", horz);
         }
-        else if(!m_Charging)
+        else if(!m_UsingPower)
         {
             if (activeParticles != null && activeParticles.isPlaying)
             { 
@@ -120,7 +175,7 @@ public class PlayerController : MonoBehaviour {
     //Flips player facing if neccessary
     void Flip(float horz)
     {
-        if(Mathf.Sign(horz) != Mathf.Sign(m_Player.facing))
+        if(Mathf.Sign(horz) != Mathf.Sign(m_Player.facing) && Mathf.Abs(horz) > float.Epsilon)
         {
             m_Player.facing *= -1;
         }
@@ -128,6 +183,7 @@ public class PlayerController : MonoBehaviour {
 
     void MoveManager(float horz, bool jump)
     {
+        Flip(horz);
         Vector2 playerVelocity = Vector2.right * m_Player.maxSpeed * horz;
         Vector2 currentVel = new Vector2(playerVelocity.x, m_rigidbody.velocity.y);
         m_rigidbody.velocity = currentVel;
@@ -142,11 +198,11 @@ public class PlayerController : MonoBehaviour {
     void ChargeAttack()
     {
         m_CanMove = false;
-        m_Charging = true;
+        m_UsingPower = true;
 
         bool hasHit = false;
 
-        RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Player.transform.position, 3f, Vector2.right * m_Player.facing, chargeAttackDistance);
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Player.transform.position, 3f, Vector2.right * m_Player.facing, ChargeData.chargeAttackDistance);
 
         Debug.Log(hits.GetLength(0));
 
@@ -165,10 +221,56 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-       m_Charging = false;
+       m_UsingPower = false;
        charging = 0f;
     }
-    
+
+    public void HandLaser()
+    {
+        LayerMask e = 1 << 9;
+        Debug.Log(e.value);
+        m_UsingPower = true;
+        LayerMask enemyLayerMask = LayerMask.GetMask("Enemy");
+        Ray laserRay = new Ray();
+        laserRay.origin = m_ShootPosition.position;
+        laserRay.direction = Vector3.right * m_Player.facing;
+
+        m_LaserLine.SetPosition(0, m_ShootPosition.position);
+
+        //Store raycast hit
+        RaycastHit2D laserHit = Physics2D.Raycast(laserRay.origin, laserRay.direction, LaserData.laserRange, enemyLayerMask);
+
+        if (!laserHit)
+        {
+            Debug.Log("Raycast returns null");
+            //Draw a big line (FIX THIS I ADDED A RANDOM 5 FOR GRINS)
+            m_LaserLine.SetPosition(1, m_ShootPosition.position + LaserData.laserRange * laserRay.direction * 5f);
+        }
+        else if (laserHit.collider.tag == "Player")
+        {
+            Debug.Log("You are hitting the player with this linecast");
+        }
+        else if (laserHit.collider.tag == "Enemy")
+        {
+            Debug.Log("You are hitting the enemy with this linecast");
+            EventManager.PostMessage(EventManager.MessageKey.LaserHit);
+            laserHit.transform.gameObject.GetComponent<Enemy>().ApplyDamage(LaserData.laserDamage); ;
+
+            //End Laser shot at enemy
+            m_LaserLine.SetPosition(1, laserHit.transform.position);
+        }
+
+        m_LaserLine.enabled = true;
+
+        //Start regulator for vfx turn off. USE INVOKE?
+        m_LaserRegulator.StartTimer();
+    }
+
+    void DisableLaserVFX()
+    {
+        m_LaserLine.enabled = false;
+    }
+
     IEnumerator SmoothMove(RaycastHit2D target)
     {
         GameObject enemy = target.collider.gameObject;
@@ -183,8 +285,8 @@ public class PlayerController : MonoBehaviour {
 
         //Reached target, add force. Move this into function?
         Debug.Log("Reached Target");
-        enemy.GetComponent<Rigidbody2D>().AddForce(-Vector3.Normalize(target.normal) * chargeForce, ForceMode2D.Impulse);
+        enemy.GetComponent<Rigidbody2D>().AddForce(-Vector3.Normalize(target.normal) * ChargeData.chargeForce, ForceMode2D.Impulse);
         m_rigidbody.velocity = Vector2.zero;
-        target.collider.gameObject.GetComponent<Enemy>().ApplyDamage(chargeDamage); //Apply damage
+        target.collider.gameObject.GetComponent<Enemy>().ApplyDamage(ChargeData.damage); //Apply damage
     }
 }

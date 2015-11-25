@@ -35,6 +35,7 @@ public class CameraController : MonoBehaviour {
 
         if(!target)
         {
+            Debug.Log("Player target not set");
             target = GameObject.FindGameObjectWithTag("Player").transform;
         }
     }

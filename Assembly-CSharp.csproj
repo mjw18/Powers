@@ -53,7 +53,7 @@
      <Compile Include="Assets\Scripts\Entity\Player\PlayerDefaultState.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\PlayerPowerUpState.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\PlayerStateMachine.cs" />
-     <Compile Include="Assets\Scripts\Entity\PowerBase.cs" />
+     <Compile Include="Assets\Scripts\Entity\Power.cs" />
      <Compile Include="Assets\Scripts\TestMessager.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateEnemyConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateLevelConfig.cs" />
@@ -63,6 +63,7 @@
      <Compile Include="Assets\Scripts\Utility\KillBox.cs" />
      <Compile Include="Assets\Scripts\Utility\LevelConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\Loader.cs" />
+     <Compile Include="Assets\Scripts\Utility\Regulator.cs" />
      <Compile Include="Assets\Scripts\Utility\State.cs" />
      <Compile Include="Assets\Scripts\Utility\StateMachine.cs" />
  <Reference Include="UnityEngine.UI">
