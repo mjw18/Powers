@@ -63,14 +63,23 @@
      <Compile Include="Assets\Scripts\Utility\KillBox.cs" />
      <Compile Include="Assets\Scripts\Utility\LevelConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\Loader.cs" />
+     <Compile Include="Assets\Scripts\Utility\PowerConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\Regulator.cs" />
      <Compile Include="Assets\Scripts\Utility\State.cs" />
      <Compile Include="Assets\Scripts\Utility\StateMachine.cs" />
+     <Compile Include="Assets\Scripts\VisualEffects\ChargeEffect.cs" />
+     <Compile Include="Assets\Scripts\VisualEffects\VisualEffect.cs" />
+ <Reference Include="UnityEngine.Advertisements">
+ <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll</HintPath>
+ </Reference>
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Networking">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityEngine.Analytics">
+ <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
  </Reference>
  <Reference Include="Mono.Cecil">
  <HintPath>C:/Program Files/Unity/Editor/Data/Managed/Mono.Cecil.dll</HintPath>
