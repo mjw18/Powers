@@ -36,11 +36,6 @@ public class TargetSelector : MonoBehaviour {
             m_Transform.localScale /= 3;
             radius /= 3;
         }
-        if(Input.GetMouseButtonUp(1))
-        {
-            SelectTargets();
-            Debug.Log("targeted: " + targets.Count);
-        }
 
         m_Transform.position = cameraController.GetMousePosition();  
 	}
@@ -51,7 +46,7 @@ public class TargetSelector : MonoBehaviour {
         m_Selector.radius = (tRadius > 0f) ? tRadius : radius;
     }
 
-    void SelectTargets()
+    public void SelectTargets()
     {
         if (targets.Count > 0) targets.Clear();
 
@@ -61,7 +56,6 @@ public class TargetSelector : MonoBehaviour {
             //Fix this, I hate strings. Use a layermask in overlap
             if(col.gameObject.tag != "Ground" && col.tag != "TargetSelector")
             {
-                Debug.Log(col.tag);
                 targets.Add(col.gameObject);
             }
         }

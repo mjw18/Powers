@@ -10,15 +10,29 @@ public class Regulator : MonoBehaviour {
     private float m_lastTime = 0f;
     private bool m_timing = false;
 
+    //DeltaTime calculated in real time
+    private float deltaTime = 0.0f;
+    public float realDeltaTime
+    {
+        get { return deltaTime; }
+    }
+
+    private float m_deltaLastTime = 0.0f;
+
 	void Awake ()
     {
         m_startTime = Time.realtimeSinceStartup;
-        this.enabled = false;
+        //this.enabled = false;
 	}
 	
 	void Update ()
     {
+        float cur = Time.realtimeSinceStartup;
+
         if (m_timing) UpdateTimer();
+
+        deltaTime = cur - m_deltaLastTime;
+        m_deltaLastTime = cur;
 	}
 
     //Udate Timer Independent of Time.timescale
@@ -31,7 +45,7 @@ public class Regulator : MonoBehaviour {
     
     public void StartTimer()
     {
-        this.enabled = true;
+        //this.enabled = true;
         m_startTime = Time.realtimeSinceStartup;
         m_timer = 0f;
         m_lastTime = m_startTime;
@@ -58,7 +72,7 @@ public class Regulator : MonoBehaviour {
     {
         m_timer = 0;
         m_timing = false;
-        this.enabled = false;
+        //this.enabled = false;
     }
 
 }

@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Easing
+public static class Easing
 {
-    public float EaseIn(float a, float b, float t, EasingType easeType)
+    public static float EaseIn(float a, float b, float t, EasingType easeType)
     {
         t = Mathf.Clamp(t, 0, 1);
 
@@ -15,7 +15,7 @@ public class Easing
                 return PolynomialEaseIn(a, b, t, 2);
             case (EasingType.Cubic):
                 return PolynomialEaseIn(a, b, t, 3);
-            case (EasingType.Quadric):
+            case (EasingType.Quartic):
                 return PolynomialEaseIn(a, b, t, 4);
             case (EasingType.Quintic):
                 return PolynomialEaseIn(a, b, t, 5);
@@ -27,7 +27,7 @@ public class Easing
     }
 
     //Return linear for invalid easeType
-    public float EaseOut(float a, float b, float t, EasingType easeType)
+    public static float EaseOut(float a, float b, float t, EasingType easeType)
     {
         t = Mathf.Clamp(t, 0, 1);
 
@@ -39,7 +39,7 @@ public class Easing
                 return PolynomialEaseOut(a, b, t, 2);
             case (EasingType.Cubic):
                 return PolynomialEaseOut(a, b, t, 3);
-            case (EasingType.Quadric):
+            case (EasingType.Quartic):
                 return PolynomialEaseOut(a, b, t, 4);
             case (EasingType.Quintic):
                 return PolynomialEaseOut(a, b, t, 5);
@@ -50,14 +50,11 @@ public class Easing
         return a;
     }
 
-    public float EaseInOut(float a, float b, float t, EasingType easeType)
+    public static float EaseInOut(float a, float b, float t, EasingType easeType)
     {
         t = Mathf.Clamp(t, 0, 1);
 
-        if(t == 1)
-        {
-            return b;
-        }
+        if(a == b) return b;
 
         switch (easeType)
         {
@@ -67,7 +64,7 @@ public class Easing
                 return PolynomialEaseInOut(a, b, t, 2);
             case (EasingType.Cubic):
                 return PolynomialEaseInOut(a, b, t, 3);
-            case (EasingType.Quadric):
+            case (EasingType.Quartic):
                 return PolynomialEaseInOut(a, b, t, 4);
             case (EasingType.Quintic):
                 return PolynomialEaseInOut(a, b, t, 5);
@@ -78,17 +75,17 @@ public class Easing
         return a;
     }
 	
-    private float PolynomialEaseIn(float a, float b, float t, int degree = 0)
+    private static float PolynomialEaseIn(float a, float b, float t, int degree)
     {
         return (1 - Mathf.Pow(t, degree)) * a + Mathf.Pow(t, degree) * b;
     }
 
-    private float PolynomialEaseOut(float a, float b, float t, int degree = 0)
+    private static float PolynomialEaseOut(float a, float b, float t, int degree)
     {
-        return ((b - a) * Mathf.Pow(1 - t, degree) + b);
+        return ((b - a) * Mathf.Pow(1 - t, degree) + a);
     }
 
-    private float PolynomialEaseInOut(float a, float b, float t, int degree = 0)
+    private static float PolynomialEaseInOut(float a, float b, float t, int degree)
     {
         float startVal = PolynomialEaseIn(1, a, (b - a) / 2, degree);
 
@@ -98,19 +95,19 @@ public class Easing
             return PolynomialEaseOut(2 * t - 1, startVal, b, degree);
     }
 
-    private float SinEaseIn(float a, float b, float t, float period)
+    private static float SinEaseIn(float a, float b, float t, float period)
     {
         float i = Mathf.Cos(t * Mathf.PI * period);
         return -(b - a) * i +  b;
     }
 
-    private float SinEaseOut(float a, float b, float t, float period)
+    private static float SinEaseOut(float a, float b, float t, float period)
     {
         float i = Mathf.Sin( (t + 1) * Mathf.PI * period);
         return (1 - i) * b + i * a;
     }
 
-    private float SinEaseInOut(float a, float b, float t, float period)
+    private static float SinEaseInOut(float a, float b, float t, float period)
     {
         float startVal = SinEaseIn(1, a, (b - a) / 2, period);
 
@@ -126,7 +123,7 @@ public enum EasingType
     Linear,
     Quadratic,
     Cubic,
-    Quadric,
+    Quartic,
     Quintic,
     Sin
 }

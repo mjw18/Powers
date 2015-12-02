@@ -20,6 +20,9 @@ public class PlayerController : MonoBehaviour {
     private bool m_CanMove = true;
     private bool m_UsingPower = false;
 
+    //Remove this!!! Use beefed up Coroutine to add Stop or checks for already running
+    private bool m_SlowingTime = false;
+
     //Charge Variables
     public static class ChargeData
     {
@@ -49,7 +52,6 @@ public class PlayerController : MonoBehaviour {
 
     private Rigidbody2D m_rigidbody;
     private Collider2D m_Collider;
-    private LineRenderer m_LaserLine;
     private Regulator m_LaserRegulator;
     private Transform m_ShootPosition;
     private SpriteRenderer m_SpriteRenderer;
@@ -60,7 +62,6 @@ public class PlayerController : MonoBehaviour {
         m_Player = GetComponent<Player>();
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_Collider = GetComponent<Collider2D>();
-        m_LaserLine = GetComponent<LineRenderer>();
         m_LaserRegulator = GetComponent<Regulator>();
         //Change this, put in laser anymway?
         m_ShootPosition = GameObject.Find("ShootPosition").transform;
@@ -70,9 +71,6 @@ public class PlayerController : MonoBehaviour {
         {
             Debug.Log("ShootPosition not found");
         }
-
-        //Dont show laser until fired
-        m_LaserLine.enabled = false;
 
         //Fuck using strings though
         chargeTimeText = GameObject.Find("EnergyText").GetComponent<Text>();
@@ -90,10 +88,16 @@ public class PlayerController : MonoBehaviour {
         //Update text
         chargeTimeText.text = string.Format("Energy: {0}", (int)m_Player.energy ); 
 
-        //Check laser regulator, if true, disable laser vfx (time is up)
-        if(m_LaserRegulator.CheckTimer())
+        if(Input.GetKeyDown(KeyCode.LeftControl) && !m_SlowingTime)
         {
-            DisableLaserVFX();
+            Debug.Log(string.Format("My delta time: {0} \n Unity delta time: {1}", m_LaserRegulator.realDeltaTime, Time.deltaTime));
+
+            m_SlowingTime = true;
+            StartCoroutine(SlowTimeScale(0.3f));
+        }
+        else if (!Input.GetKey(KeyCode.LeftControl))
+        {
+            ResetTimeScale();
         }
 
     }
@@ -131,84 +135,6 @@ public class PlayerController : MonoBehaviour {
 
     }
 
-   /* void FixedUpdate()
-    {
-        //AddExplosionForce(.....ForceMode.Impulse)
-
-        float horz = Input.GetAxis("Horizontal");
-        bool jump = Input.GetButtonDown("Jump");
-
-        if (m_CanMove)
-        {
-            MoveManager(horz, jump);
-        }
-
-        if(Input.GetKeyDown(primaryPowerKey))
-        {
-            if( m_Player.UseEnergy( ChargeData.energyCost ) )
-            {
-                if(primaryPower != null)
-                    primaryPower.Execute();
-
-                ChargeAttack();
-            }
-        }
-        else if( Input.GetKeyDown(secondaryPowerKey) )
-        {
-            if (m_Player.UseEnergy(LaserData.energyCost))
-            {
-                if(secondaryPower != null)
-                    secondaryPower.Execute();
-
-                HandLaser();
-            }
-        }
-
-        if (Input.GetButton("Fire1"))
-        {
-            if (activeParticles == null && particles != null)
-            {
-                Debug.Log(activeParticles);
-                activeParticles = (Instantiate(particles, m_Player.transform.position, Quaternion.identity) as GameObject).GetComponent<ParticleSystem>();
-                activeParticles.transform.SetParent(m_Player.transform);
-            }
-            else if (activeParticles.isStopped)
-            {
-                activeParticles.Play();
-            }
-
-            m_PoweringUp = true;
-            m_CanMove = false;
-            charging += powerUpRate;
-            //StopCoroutine("ChargeAttack");
-            charging = Mathf.Clamp(charging, 0.0f, powerUpTime);
-            Debug.Log("ChargedTime: " + charging);
-        }
-        else if(charging >= powerUpTime && !m_UsingPower && Input.GetButtonUp("Fire1"))
-        {
-
-            if (activeParticles != null && activeParticles.isPlaying)
-            {
-                activeParticles.Stop();
-            }
-            m_PoweringUp = false;
-            
-            ChargeAttack();
-            m_UsingPower = false;
-            //StartCoroutine("ChargeAttack", horz);
-        }
-        else if(!m_UsingPower)
-        {
-            if (activeParticles != null && activeParticles.isPlaying)
-            { 
-                activeParticles.Stop();
-            }
-            charging = Mathf.Clamp(charging-powerLossRate, 0.0f, 5.0f);
-            m_PoweringUp = false;
-            m_CanMove = true;
-        }
-    } */
-
     //Flips player facing if neccessary
     void Flip(float horz)
     {
@@ -235,80 +161,6 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void ChargeAttack()
-    {
-        m_CanMove = false;
-        m_UsingPower = true;
-
-        bool hasHit = false;
-
-        RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Player.transform.position, 3f, Vector2.right * m_Player.facing, ChargeData.chargeAttackDistance);
-
-        Debug.Log(hits.GetLength(0));
-
-        foreach(RaycastHit2D hit in hits)
-        {
-            Debug.Log("Entered for each");
-            if(hit.collider.tag == "Enemy" && !hasHit)
-            {
-                Debug.Log("Charge Attack Enemy at " + hit.point);
-                Debug.Log(hit.normal);
-
-                StartCoroutine(SmoothMove(hit));
-
-                hasHit = true;
-                EventManager.PostMessage(EventManager.MessageKey.ChargeHit);
-            }
-        }
-
-       m_UsingPower = false;
-       charging = 0f;
-    }
-
-    public void HandLaser()
-    {
-        
-        LayerMask enemyLayerMask = LayerMask.GetMask("Enemy");
-        Ray laserRay = new Ray();
-        laserRay.origin = m_ShootPosition.position;
-        laserRay.direction = Vector3.right * m_Player.facing;
-
-        m_LaserLine.SetPosition(0, m_ShootPosition.position);
-
-        //Store raycast hit
-        RaycastHit2D laserHit = Physics2D.Raycast(laserRay.origin, laserRay.direction, LaserData.laserRange, enemyLayerMask);
-
-        if (!laserHit)
-        {
-            Debug.Log("Raycast returns null");
-            //Draw a big line (FIX THIS I ADDED A RANDOM 5 FOR GRINS)
-            m_LaserLine.SetPosition(1, m_ShootPosition.position + LaserData.laserRange * laserRay.direction * 5f);
-        }
-        else if (laserHit.collider.tag == "Player")
-        {
-            Debug.Log("You are hitting the player with this linecast");
-        }
-        else if (laserHit.collider.tag == "Enemy")
-        {
-            Debug.Log("You are hitting the enemy with this linecast");
-            EventManager.PostMessage(EventManager.MessageKey.LaserHit);
-            laserHit.transform.gameObject.GetComponent<Enemy>().ApplyDamage(LaserData.laserDamage); ;
-
-            //End Laser shot at enemy
-            m_LaserLine.SetPosition(1, laserHit.transform.position);
-        }
-
-        m_LaserLine.enabled = true;
-
-        //Start regulator for vfx turn off. USE INVOKE?
-        m_LaserRegulator.StartTimer();
-    }
-
-    void DisableLaserVFX()
-    {
-        m_LaserLine.enabled = false;
-    }
-
     IEnumerator SmoothMove(RaycastHit2D target)
     {
         GameObject enemy = target.collider.gameObject;
@@ -327,4 +179,41 @@ public class PlayerController : MonoBehaviour {
         m_rigidbody.velocity = Vector2.zero;
         target.collider.gameObject.GetComponent<Enemy>().ApplyDamage(ChargeData.damage); //Apply damage
     }
+
+    IEnumerator SlowTimeScale(float slowFactor)
+    {
+        float rate = 15f;
+
+        while(Time.timeScale >= (slowFactor + 0.01f))
+        {
+            Time.timeScale = Easing.EaseOut(Time.timeScale, slowFactor, rate * m_LaserRegulator.realDeltaTime, EasingType.Quadratic);
+            Debug.Log(Time.timeScale);
+            yield return null;
+        }
+        Debug.Log(Time.timeScale);
+
+        while(Input.GetKey(KeyCode.LeftControl))
+        {
+            yield return null;
+        }
+        yield return StartCoroutine(ResetTimeScale());
+    }
+
+    IEnumerator ResetTimeScale()
+    {
+        float rate = 15f;
+        Debug.Log("Speeding back up");
+        while (Time.timeScale < 1 - 0.1f)
+        {
+            Time.timeScale = Easing.EaseIn(Time.timeScale, 1, rate * m_LaserRegulator.realDeltaTime, EasingType.Quintic);
+            Debug.Log(Time.timeScale);
+            yield return null;
+        }
+
+        m_SlowingTime = false;
+        Time.timeScale = 1f;
+        Debug.Log("FullSpeed: " + Time.timeScale);
+        yield return null;
+    }
+
 }
