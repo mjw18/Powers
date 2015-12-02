@@ -6,6 +6,8 @@ public class Enemy : MonoBehaviour {
     public EnemyConfig config;
     private EnemyData refData;
 
+    public bool targeted;
+
     public ParticleSystem DeathParticles;
 
 	// Use this for initialization
@@ -20,6 +22,10 @@ public class Enemy : MonoBehaviour {
         if (refData.health <= -float.Epsilon)
         {
             Kill();
+        }
+        else if(targeted)
+        {
+            Debug.Log("This enemy has been targeted");
         }
     }
 

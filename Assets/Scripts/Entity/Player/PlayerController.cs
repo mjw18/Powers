@@ -52,9 +52,11 @@ public class PlayerController : MonoBehaviour {
     private LineRenderer m_LaserLine;
     private Regulator m_LaserRegulator;
     private Transform m_ShootPosition;
+    private SpriteRenderer m_SpriteRenderer;
 
 	void Awake ()
     {
+        //Error Checking would be nice?
         m_Player = GetComponent<Player>();
         m_rigidbody = GetComponent<Rigidbody2D>();
         m_Collider = GetComponent<Collider2D>();
@@ -62,6 +64,8 @@ public class PlayerController : MonoBehaviour {
         m_LaserRegulator = GetComponent<Regulator>();
         //Change this, put in laser anymway?
         m_ShootPosition = GameObject.Find("ShootPosition").transform;
+        m_SpriteRenderer = GetComponent<SpriteRenderer>();
+
         if(!m_ShootPosition)
         {
             Debug.Log("ShootPosition not found");
@@ -95,6 +99,39 @@ public class PlayerController : MonoBehaviour {
     }
 
     void FixedUpdate()
+    {
+        float horz = Input.GetAxis("Horizontal");
+        bool jump = Input.GetButtonDown("Jump");
+
+        if (m_CanMove)
+        {
+            MoveManager(horz, jump);
+        }
+
+        if (Input.GetKeyDown(primaryPowerKey))
+        {
+            if (m_Player.UseEnergy(ChargeData.energyCost))
+            {
+                if (primaryPower != null)
+                    primaryPower.Execute();
+
+                //ChargeAttack();
+            }
+        }
+        else if (Input.GetKeyDown(secondaryPowerKey))
+        {
+            if (m_Player.UseEnergy(LaserData.energyCost))
+            {
+                if (secondaryPower != null)
+                    secondaryPower.Execute();
+
+                //HandLaser();
+            }
+        }
+
+    }
+
+   /* void FixedUpdate()
     {
         //AddExplosionForce(.....ForceMode.Impulse)
 
@@ -170,14 +207,17 @@ public class PlayerController : MonoBehaviour {
             m_PoweringUp = false;
             m_CanMove = true;
         }
-    }
+    } */
 
     //Flips player facing if neccessary
     void Flip(float horz)
     {
         if(Mathf.Sign(horz) != Mathf.Sign(m_Player.facing) && Mathf.Abs(horz) > float.Epsilon)
         {
+            //Change facing direction to opposite
             m_Player.facing *= -1;
+            //Flip sprite
+            m_Player.transform.localScale = new Vector3(m_Player.facing, 1f, 1f);
         }
     }
 
@@ -227,9 +267,7 @@ public class PlayerController : MonoBehaviour {
 
     public void HandLaser()
     {
-        LayerMask e = 1 << 9;
-        Debug.Log(e.value);
-        m_UsingPower = true;
+        
         LayerMask enemyLayerMask = LayerMask.GetMask("Enemy");
         Ray laserRay = new Ray();
         laserRay.origin = m_ShootPosition.position;

@@ -7,7 +7,6 @@ public class GameManager : MonoBehaviour {
 
     public static GameManager instance;
 
-    public GameObject testMessager;
     public GameObject player;
     public GameObject enemy;
     private Text killCount;
@@ -15,9 +14,14 @@ public class GameManager : MonoBehaviour {
     public Vector3 playerSpawn;
     public Vector3 enemySpawn;
 
+    //Move to enemy class as static list
     public List<Enemy> enemies;
 
+    public float respawnTime = 1f;
+
     private GameObject m_Player;
+
+    public ObjectPool laserShotPool;
 
     private int m_KillCount = 0;
 
@@ -63,11 +67,15 @@ public class GameManager : MonoBehaviour {
         }
         if(!m_Player.activeSelf)
         {
-            RespawnPlayer();
+            Invoke("RespawnPlayer", 1f);
         }
-        if(Input.GetKeyDown("r"))
+        if (Input.GetKeyDown("r"))
         {
             Restart();
+        }
+        if(Input.GetKeyDown("b"))
+        {
+            ShootLaser();
         }
     }
 
@@ -85,9 +93,10 @@ public class GameManager : MonoBehaviour {
         killCount.text = "Kills: " + m_KillCount;
 
         enemies.Clear();
-        Instantiate(testMessager);
         SpawnPlayer();
         SpawnEnemies();
+        laserShotPool = GetComponent<ObjectPool>();
+        Debug.Log("ObjectPool: " + laserShotPool);
     }
 
     void RegisterListeners()
@@ -141,4 +150,10 @@ public class GameManager : MonoBehaviour {
         float x = Random.Range(-1f, 1f);
         return new Vector3(x, 1, 0); 
     }
+
+    public void ShootLaser()
+    {
+        laserShotPool.NextPooledObject();
+    }
+
 }

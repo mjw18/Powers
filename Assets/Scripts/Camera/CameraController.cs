@@ -68,4 +68,13 @@ public class CameraController : MonoBehaviour {
         Vector3 camPos = new Vector3(target.position.x, target.position.y, m_Camera.transform.position.z);
         m_Camera.transform.position = camPos; 
     }
+    
+    public Vector3 GetMousePosition()
+    {
+        //Transfers camera's z position, we don't want this
+        Vector3 uncorrectedPos = m_Camera.ScreenToWorldPoint(Input.mousePosition);
+        //set z to 0 (gameplay plane)
+        Vector3 correctedPos = new Vector3(uncorrectedPos.x, uncorrectedPos.y, 0f);
+        return correctedPos;    
+    }
 }

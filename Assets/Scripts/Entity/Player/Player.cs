@@ -22,7 +22,7 @@ public class Player : MonoBehaviour
     }
 
     private CircleCollider2D m_groundCheck;
-
+    private SpriteRenderer m_SpriteRenderer;
     private BoxCollider2D m_collider;
     private Animator m_animController;
 
@@ -33,6 +33,7 @@ public class Player : MonoBehaviour
         //m_StateMachine.Init();
 
         m_groundCheck = GameObject.Find("GroundCheck").GetComponent<CircleCollider2D>();
+        m_SpriteRenderer = GetComponent<SpriteRenderer>();
         m_collider = GetComponent<BoxCollider2D>();
         m_animController = GetComponent<Animator>();
     }
