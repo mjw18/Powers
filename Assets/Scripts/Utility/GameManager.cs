@@ -73,10 +73,6 @@ public class GameManager : MonoBehaviour {
         {
             Restart();
         }
-        if(Input.GetKeyDown("b"))
-        {
-            ShootLaser();
-        }
     }
 
     //Spawn Enemies and Player at predifined spawn points. Use Scriptable object for level config here?
@@ -150,10 +146,4 @@ public class GameManager : MonoBehaviour {
         float x = Random.Range(-1f, 1f);
         return new Vector3(x, 1, 0); 
     }
-
-    public void ShootLaser()
-    {
-        laserShotPool.NextPooledObject();
-    }
-
 }

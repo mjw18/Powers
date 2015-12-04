@@ -9,38 +9,8 @@ public class PlayerController : MonoBehaviour {
     public Power primaryPower;
     public Power secondaryPower; 
 
-    //These Should probably be removed soon
-    public float powerUpTime = 0.5f;
-    public float powerUpRate = 0.05f;
-    public float powerLossRate = 0.01f;
-    public float chargeTime = 3f;
-
-    public float charging = 0f;
-    private bool m_PoweringUp = false;
-    private bool m_CanMove = true;
-    private bool m_UsingPower = false;
-
     //Remove this!!! Use beefed up Coroutine to add Stop or checks for already running
     private bool m_SlowingTime = false;
-
-    //Charge Variables
-    public static class ChargeData
-    {
-        public static float chargeAttackDistance;
-        public static float damage = 75f;
-        public static float chargeForce = 10f;
-        public static float energyCost = 15f;
-    }
-
-    //Laser variables
-    public class LaserData
-    {
-        public static float energyCost = 3f;
-        public static float laserRange = 5.0f;
-        public static float laserDamage = 4.0f;
-        public static float laserFirerate = 1.0f;
-        public static Color laserColor = new Color(80, 120, 120);
-    }
 
     public GameObject particles;
 
@@ -66,6 +36,8 @@ public class PlayerController : MonoBehaviour {
         //Change this, put in laser anymway?
         m_ShootPosition = GameObject.Find("ShootPosition").transform;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
+
+        primaryPower = GetComponent<HandLaser>();
 
         if(!m_ShootPosition)
         {
@@ -95,9 +67,9 @@ public class PlayerController : MonoBehaviour {
             m_SlowingTime = true;
             StartCoroutine(SlowTimeScale(0.3f));
         }
-        else if (!Input.GetKey(KeyCode.LeftControl))
+        if (!Input.GetKey(KeyCode.LeftControl) && Time.timeScale <= 0.98)
         {
-            ResetTimeScale();
+            StartCoroutine(ResetTimeScale());
         }
 
     }
@@ -107,6 +79,7 @@ public class PlayerController : MonoBehaviour {
         float horz = Input.GetAxis("Horizontal");
         bool jump = Input.GetButtonDown("Jump");
 
+        bool m_CanMove = true;
         if (m_CanMove)
         {
             MoveManager(horz, jump);
@@ -114,7 +87,7 @@ public class PlayerController : MonoBehaviour {
 
         if (Input.GetKeyDown(primaryPowerKey))
         {
-            if (m_Player.UseEnergy(ChargeData.energyCost))
+            if (m_Player.UseEnergy(primaryPower.powerConfig.energyCost))
             {
                 if (primaryPower != null)
                     primaryPower.Execute();
@@ -124,7 +97,7 @@ public class PlayerController : MonoBehaviour {
         }
         else if (Input.GetKeyDown(secondaryPowerKey))
         {
-            if (m_Player.UseEnergy(LaserData.energyCost))
+            if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost))
             {
                 if (secondaryPower != null)
                     secondaryPower.Execute();
@@ -174,10 +147,10 @@ public class PlayerController : MonoBehaviour {
         }
 
         //Reached target, add force. Move this into function?
-        Debug.Log("Reached Target");
+       /* Debug.Log("Reached Target");
         enemy.GetComponent<Rigidbody2D>().AddForce(-Vector3.Normalize(target.normal) * ChargeData.chargeForce, ForceMode2D.Impulse);
         m_rigidbody.velocity = Vector2.zero;
-        target.collider.gameObject.GetComponent<Enemy>().ApplyDamage(ChargeData.damage); //Apply damage
+        target.collider.gameObject.GetComponent<Enemy>().ApplyDamage(ChargeData.damage); //Apply damage*/
     }
 
     IEnumerator SlowTimeScale(float slowFactor)
@@ -192,11 +165,12 @@ public class PlayerController : MonoBehaviour {
         }
         Debug.Log(Time.timeScale);
 
-        while(Input.GetKey(KeyCode.LeftControl))
+        yield return null;
+        /*while(Input.GetKey(KeyCode.LeftControl))
         {
             yield return null;
         }
-        yield return StartCoroutine(ResetTimeScale());
+        yield return StartCoroutine(ResetTimeScale());*/
     }
 
     IEnumerator ResetTimeScale()

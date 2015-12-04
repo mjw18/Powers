@@ -68,7 +68,8 @@ public class TargetSelector : MonoBehaviour {
 
     void OnTriggerStay2D(Collider2D other)
     {
-        //Debug.Log("There is an object here: " + other);
+        if(other.gameObject.tag == "Ground")
+            Debug.Log("There is an object here: " + other);
     }
 }
 

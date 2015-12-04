@@ -3,8 +3,8 @@ using System.Collections;
 
 public class LaserShot : MonoBehaviour {
 
-    public Transform laserShooter;
     public float lifetime = 10f;
+
     private Transform m_Transform;
     private Regulator m_LifeTimer;
 
@@ -17,7 +17,6 @@ public class LaserShot : MonoBehaviour {
 
     void OnEnable()
     {
-        m_Transform.position = laserShooter.position;
         //Use regulator? Gives option for backing out of double setactive call
         m_LifeTimer.StartTimer();
     }
@@ -32,9 +31,10 @@ public class LaserShot : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if(other.tag != "Player")
+        if(other.gameObject.tag != "Player")
         {
             Debug.Log(other);
+            //Resets the lifetime timer
             m_LifeTimer.StopTimer();
             DestroyLaserShot();
             Debug.Log("LaserDestroyed!");

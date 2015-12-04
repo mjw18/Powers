@@ -19,15 +19,15 @@ public class ObjectPool : MonoBehaviour{
         }
     }
 
-    //Returns inactive gameobject
-    public GameObject NextPooledObject()
+    //Returns inactive gameobject, input whether to ativate object or not
+    public GameObject NextPooledObject(bool setActive = true)
     {
         for (int i = 0; i < size; i++)
         {
             if(!objectPool[i].activeSelf)
             {
                 //Don't set active here?
-                objectPool[i].SetActive(true);
+                objectPool[i].SetActive(setActive);
                 return objectPool[i];
             }
         }

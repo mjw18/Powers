@@ -16,12 +16,18 @@ public class Power : MonoBehaviour {
 
     public PowerConfig powerConfig;
 
-    public Transform player;
+    public GameObject m_player;
     public Transform target;
     public TargetSelector targetSelector;
 
-    void Init()
+    protected Player player;
+    private Transform playerTransform;
+
+    protected void Init()
     {
+        player = GetComponent<Player>();
+        playerTransform = player.transform;
+
         foreach (var effect in powerConfig.visualEffects)
         {
             SetPosition(effect.visualEffect, effect.placement, effect.offset);
@@ -33,13 +39,13 @@ public class Power : MonoBehaviour {
         switch (effectPlacement)
         {
             case VisualEffectPlacement.CenteredOnPlayer:
-                effect.SetPosition(player.position);
+                effect.SetPosition(playerTransform.position);
                 break;
             case VisualEffectPlacement.CenteredAtTarget:
                 effect.SetPosition(target.position);
                 break;
             case VisualEffectPlacement.OffsetPlayer:
-                effect.SetPosition(player.position + offset);
+                effect.SetPosition(playerTransform.position + offset);
                 break;
             case VisualEffectPlacement.OffsetTarget:
                 effect.SetPosition(target.position + offset);
