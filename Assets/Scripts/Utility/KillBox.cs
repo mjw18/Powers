@@ -7,12 +7,13 @@ public class KillBox : MonoBehaviour {
     {
         if(other.tag == "Enemy")
         {
-            Debug.Log(other + " has fallen off map!");
             other.GetComponent<Enemy>().Kill();
         }
         else if ( other.tag == "Player")
         {
-            other.gameObject.SetActive(false);
+            //Change This is stupid
+            //GroundCheck hits first so we have to look in parent
+            other.gameObject.GetComponentInParent<Player>().ApplyDamage(100f);
         }
     }
 }

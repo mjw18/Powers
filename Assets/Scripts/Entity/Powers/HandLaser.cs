@@ -50,4 +50,20 @@ public class HandLaser : Power {
           // hitPosition = laserHit.transform.position;
         }
     }
+
+    public void OnLaserHit(Collider2D col)
+    {
+        foreach (var effect in powerConfig.visualEffects)
+        {
+            if(effect.placement == VisualEffectPlacement.CenteredAtTarget)
+            {
+                effect.visualEffect.SetPosition(col.gameObject.transform.position);
+            }
+        }
+
+        if (col.gameObject.tag == "Enemy")
+        {
+            col.GetComponent<Enemy>().ApplyDamage(powerConfig.damage);
+        }
+    }
 }

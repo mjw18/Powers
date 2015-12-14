@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour {
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
 
         primaryPower = GetComponent<HandLaser>();
+        secondaryPower = GetComponent<Charge>();
 
         if(!m_ShootPosition)
         {
@@ -67,10 +68,10 @@ public class PlayerController : MonoBehaviour {
             m_SlowingTime = true;
             StartCoroutine(SlowTimeScale(0.3f));
         }
-        if (!Input.GetKey(KeyCode.LeftControl) && Time.timeScale <= 0.98)
+      /*  if (!Input.GetKey(KeyCode.LeftControl) && Time.timeScale <= 0.98)
         {
             StartCoroutine(ResetTimeScale());
-        }
+        }*/
 
     }
 
@@ -97,6 +98,8 @@ public class PlayerController : MonoBehaviour {
         }
         else if (Input.GetKeyDown(secondaryPowerKey))
         {
+            Debug.Log(secondaryPower.powerConfig);
+
             if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost))
             {
                 if (secondaryPower != null)
@@ -127,7 +130,7 @@ public class PlayerController : MonoBehaviour {
         Vector2 currentVel = new Vector2(playerVelocity.x, m_rigidbody.velocity.y);
         m_rigidbody.velocity = currentVel;
 
-        if (jump && m_Player.grounded)
+        if (jump && m_Player.CheckGrounded())
         {
             m_rigidbody.AddForce(m_Player.jumpForce * Vector2.up);
             m_Player.grounded = false;

@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Player : MonoBehaviour
 {
+    private float health = 100f;
+
     public float maxSpeed = 10f;
     public float jumpForce = 100f;
     public int facing = 1;
@@ -17,7 +19,7 @@ public class Player : MonoBehaviour
     private bool m_grounded = false;
     public float groundCheckRadius = 0.1f;
     private Transform m_GroundCheck;
-    //This is stupid...
+
     public bool grounded
     {
         get { return m_grounded; }
@@ -47,7 +49,22 @@ public class Player : MonoBehaviour
     {
         //Handle player energy for powers
         energy = Mathf.Clamp(energy + energyRechargeRate * Time.deltaTime, 0.0f, maxEnergy);
-	}
+    }
+
+    public bool CheckGrounded()
+    {
+        //Move all this to separate script
+        Collider2D[] cols = Physics2D.OverlapCircleAll(m_GroundCheck.position, groundCheckRadius);
+        foreach (Collider2D col in cols)
+        {
+            //Still don't like these strings
+            if (col.gameObject.tag == "Ground")
+            {
+                return true;
+            }            
+        }
+        return false;
+    }
 
     void FixedUpdate()
     {
@@ -56,7 +73,7 @@ public class Player : MonoBehaviour
         foreach (Collider2D col in cols)
         {
             //Still don't like these strings
-            if (col.tag != "Ground")
+            if (col.gameObject.tag != "Ground")
             {
                 continue;
             }
@@ -79,6 +96,18 @@ public class Player : MonoBehaviour
         
     }
 
+    public void ApplyDamage(float damage)
+    {
+        health -= damage;
+        if(health <= float.Epsilon)
+        {
+            OnPlayerDied();
+        }
+    }
 
-
+    public void OnPlayerDied()
+    {
+        EventManager.PostMessage(EventManager.MessageKey.PlayerDied);
+        gameObject.SetActive(false);
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+#if UNITY_EDITOR
 using UnityEditor;
 
 public class CreatePowerConfig {
@@ -10,3 +11,4 @@ public class CreatePowerConfig {
         CreateConfig.DoCreateConfig<PowerConfig>();
     }
 }
+#endif

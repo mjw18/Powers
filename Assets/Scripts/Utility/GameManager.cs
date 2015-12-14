@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour {
 
     public ObjectPool laserShotPool;
 
+    public Regulator globalRegulator;
+
     private int m_KillCount = 0;
 
     // Use this for initialization
@@ -42,14 +44,19 @@ public class GameManager : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
 
         enemies = new List<Enemy>();
+        if (!laserShotPool) laserShotPool = GetComponent<ObjectPool>();
+
+        globalRegulator = GetComponent<Regulator>();
+
         Init();
 	}
 
-    void OnLevelWasLoaded()
+    /*void OnLevelWasLoaded()
     {
         Debug.Log("LoadedLevel");
         Init();
-    }
+        laserShotPool.InitPool();
+    }*/
 
     void OnDestroy()
     {
@@ -65,9 +72,11 @@ public class GameManager : MonoBehaviour {
         {
             SpawnEnemies();
         }
+        //RespawnPlayer at starting Pos
         if(!m_Player.activeSelf)
         {
-            Invoke("RespawnPlayer", 1f);
+            RespawnPlayer();
+            //Invoke("RespawnPlayer", 1f);
         }
         if (Input.GetKeyDown("r"))
         {
@@ -91,8 +100,6 @@ public class GameManager : MonoBehaviour {
         enemies.Clear();
         SpawnPlayer();
         SpawnEnemies();
-        laserShotPool = GetComponent<ObjectPool>();
-        Debug.Log("ObjectPool: " + laserShotPool);
     }
 
     void RegisterListeners()
@@ -108,7 +115,6 @@ public class GameManager : MonoBehaviour {
     void OnEnemyDeath()
     {
         m_KillCount += 1;
-        Debug.Log("Kills: " + m_KillCount);
     }
 
     void Restart()
@@ -120,6 +126,7 @@ public class GameManager : MonoBehaviour {
     {
         m_Player.transform.position = playerSpawn;
         m_Player.SetActive(true);
+        EventManager.PostMessage(EventManager.MessageKey.PlayerRespawned);
     }
 
     void SpawnPlayer()

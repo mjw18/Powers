@@ -7,8 +7,7 @@ using System.Collections.Generic;
 // Regulator? Cooldown uses regulator class or handle logic 
 //      with cooldown timer Mono object
 
-//public class AbilityVisualEffect;
-
+//Consider virtual "CanHitTarget" Function that does not allow selection of unreachable targets
 public class Power : MonoBehaviour {
 
     public int cooldown;
@@ -16,25 +15,32 @@ public class Power : MonoBehaviour {
 
     public PowerConfig powerConfig;
 
-    public GameObject m_player;
+    public GameObject m_Player;
     public Transform target;
     public TargetSelector targetSelector;
 
     protected Player player;
-    private Transform playerTransform;
+    protected Rigidbody2D playerRigidbody;
+    protected Transform playerTransform;
 
     protected void Init()
     {
         player = GetComponent<Player>();
         playerTransform = player.transform;
+        playerRigidbody = player.GetComponent<Rigidbody2D>();
+
+        targetSelector = GameObject.Find("TargetSelector").GetComponent<TargetSelector>();
+
+        m_Player = this.gameObject;
 
         foreach (var effect in powerConfig.visualEffects)
         {
-            SetPosition(effect.visualEffect, effect.placement, effect.offset);
+            SetEffectPosition(effect.visualEffect, effect.placement, effect.offset);
         }
     }
 
-    void SetPosition(VisualEffect effect, VisualEffectPlacement effectPlacement, Vector3 offset)
+    //Use AbilityVisualEffect Offset
+    void SetEffectPosition(VisualEffect effect, VisualEffectPlacement effectPlacement, Vector3 offset)
     {
         switch (effectPlacement)
         {
@@ -56,14 +62,8 @@ public class Power : MonoBehaviour {
         }
     }
 
-    public void AcquireTarget()
+    public void DamageTarget()
     {
-        //Clear current targets list
-        if (targetSelector.targets.Count != 0)
-            targetSelector.targets.Clear();
-
-        targetSelector.gameObject.SetActive(true);
-
         switch (powerConfig.damageType)
         {
             case DamageType.SingleTarget:
@@ -77,8 +77,18 @@ public class Power : MonoBehaviour {
         }
     }
 
-    void SingleTargetAcquire()
+    void AquireTargets()
     {
+        //Negative input value sets to singlee target acquisition
+        targetSelector.ResizeSelector(powerConfig.effectRadius);
+        targetSelector.gameObject.SetActive(true);
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            targetSelector.SelectTargets();
+        }
+
+        targetSelector.gameObject.SetActive(false);
     }
 
     virtual public void Execute()

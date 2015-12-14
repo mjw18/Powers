@@ -11,6 +11,13 @@ public class ObjectPool : MonoBehaviour{
 
     void Awake()
     {
+        InitPool();
+    }
+
+    public void InitPool()
+    {
+        if(objectPool.Count > 0)  objectPool.Clear();
+
         for (int i = 0; i < size; i++)
         {
             GameObject temp = Instantiate(pooledObject) as GameObject;
@@ -74,18 +81,10 @@ public class ObjectPool : MonoBehaviour{
 
     void Update()
     {
-        if(Input.GetKeyDown("l"))
-        {
-            Debug.Log("Pool size: " + objectPool.Count);
-        }
-        if(Input.GetKeyDown("p"))
-        {
-            CleanPool();
-            Debug.Log("CleanPool size: " + objectPool.Count);
-        }
-        if(Input.GetKeyDown("m"))
-        {
-            StartCoroutine("CoCleanPool");
-        }
+    }
+
+    void OnDestroy()
+    {
+        Debug.Log("This pool was destroyed");
     }
 }

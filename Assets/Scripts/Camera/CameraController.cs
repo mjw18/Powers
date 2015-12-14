@@ -8,40 +8,51 @@ public class CameraController : MonoBehaviour {
     public float shakeSpeed;
     public float shakeDistance;
 
+    public Easing.VectorEasingFunction easeFunction = Easing.VectorEaseInOut;
+    public EasingType e = EasingType.Sin;
+
     private UnityAction shakeCamera;
     private Camera m_Camera;
 
+    private Transform m_CameraTransform;
     public Transform target;
+    private bool m_DoFollow = false;
 
 
 	// Use this for initialization
 	void Start ()
     {
         m_Camera = GetComponent<Camera>();
+        m_CameraTransform = m_Camera.transform;
         target = GameObject.FindGameObjectWithTag("Player").transform;
         if(!target)
         {
             Debug.Log("Camera target not set");
         }
 
+        m_DoFollow = true;
+        //Necessary?
+        shakeCamera = ShakeCamera;
         //Register Shake Camera, own function/ dd one if more message registers
-        EventManager.RegisterListener(EventManager.MessageKey.ChargeHit, ShakeCamera);
+        EventManager.RegisterListener(EventManager.MessageKey.ChargeHit, shakeCamera);
+        EventManager.RegisterListener(EventManager.MessageKey.PlayerRespawned, OnTargetLoss);
 	}
 	
 	// Update is called once per frame
 	void Update ()
     {
-        Follow();
+        if(m_DoFollow) Follow();
 
         if(!target)
         {
-            Debug.Log("Player target not set");
-            target = GameObject.FindGameObjectWithTag("Player").transform;
+            m_DoFollow = false;
+            Invoke("OnTargetLoss", 2f);
         }
     }
 
     public IEnumerator ShakeCamera(float shakeTime)
     {
+        Debug.Log("Shaking Camera");
         float endTime = Time.time + shakeTime;
         Vector3 startPos = m_Camera.transform.position;
         while(Time.time <= endTime)
@@ -50,11 +61,11 @@ public class CameraController : MonoBehaviour {
                                          shakeDistance * Mathf.Cos(shakeSpeed * Time.deltaTime), 0f);
             Vector3 newpos = startPos + offset;
 
-            m_Camera.transform.position = newpos;
+            m_CameraTransform.position = newpos;
             yield return null;
         }
 
-        m_Camera.transform.position = startPos;
+        m_CameraTransform.position = startPos;
         yield return null;
     }
 
@@ -63,12 +74,21 @@ public class CameraController : MonoBehaviour {
         StartCoroutine(ShakeCamera(shakeTime));
     }
 
+    //This is terrible, use easing functions
     public void Follow()
     {
-        Vector3 camPos = new Vector3(target.position.x, target.position.y, m_Camera.transform.position.z);
-        m_Camera.transform.position = camPos; 
+        Vector3 camPos = new Vector3(target.position.x, target.position.y, m_CameraTransform.position.z);
+        m_CameraTransform.position = camPos; 
     }
-    
+
+    //use return coroutine here (for completion bool? for I dont know what)
+    void OnTargetLoss()
+    {
+        m_DoFollow = false;
+        Time.timeScale = 0.0f;
+        StartCoroutine(MoveCameraToTarget(m_CameraTransform, target, 2f));
+    }
+
     public Vector3 GetMousePosition()
     {
         //Transfers camera's z position, we don't want this
@@ -77,4 +97,25 @@ public class CameraController : MonoBehaviour {
         Vector3 correctedPos = new Vector3(uncorrectedPos.x, uncorrectedPos.y, 0f);
         return correctedPos;    
     }
+
+    //Write Extension method if ever return values from Coroutine
+    IEnumerator MoveCameraToTarget(Transform mod, Transform curTarget, float duration)
+    {
+        float t = 0f;
+        Vector3 targPos = curTarget.position + Vector3.forward * m_CameraTransform.position.z;
+        Vector3 tempPos = m_CameraTransform.position;
+        //The rate to add to the t value (1/s)
+        float rate = 1.0f / duration;
+
+        while (t <= 1f)
+        {
+            mod.position = Easing.InterpolateVector(tempPos, targPos, t, e, easeFunction);
+            t += rate * GameManager.instance.globalRegulator.realDeltaTime;
+            yield return curTarget;
+        }
+
+        m_DoFollow = true;
+        Time.timeScale = 1.0f;
+        yield return null;
+    }    
 }

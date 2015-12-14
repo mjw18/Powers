@@ -10,6 +10,7 @@ public class TargetSelector : MonoBehaviour {
     public CameraController cameraController;
     public List<GameObject> targets;
 
+    public float singleTargetRadius;
     public float radius = 0.1f;
 
 	void Awake ()
@@ -37,13 +38,18 @@ public class TargetSelector : MonoBehaviour {
             radius /= 3;
         }
 
+        if(Input.GetMouseButtonDown(1))
+        {
+            SelectTargets();
+        }
+
         m_Transform.position = cameraController.GetMousePosition();  
 	}
 
     //Resize selector, if input is empty then radius is set to initial radius
-    void ResizeSelector(float tRadius = -1.0f)
+    public void ResizeSelector(float tRadius = -1.0f)
     {
-        m_Selector.radius = (tRadius > 0f) ? tRadius : radius;
+        m_Selector.radius = (tRadius > 0f) ? tRadius : singleTargetRadius;
     }
 
     public void SelectTargets()
@@ -54,7 +60,7 @@ public class TargetSelector : MonoBehaviour {
         foreach (Collider2D col in cols)
         {
             //Fix this, I hate strings. Use a layermask in overlap
-            if(col.gameObject.tag != "Ground" && col.tag != "TargetSelector")
+            if(col.gameObject.tag != "Ground" && col.gameObject.tag != "TargetSelector")
             {
                 targets.Add(col.gameObject);
             }
@@ -63,13 +69,19 @@ public class TargetSelector : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("An object has entered the trigger: " + other);
+        if(other.gameObject.tag == "Enemy")
+        {
+            other.GetComponent<Enemy>().targeted = true;
+        }
     }
 
-    void OnTriggerStay2D(Collider2D other)
+    void OnTriggerExit2D(Collider2D other)
     {
-        if(other.gameObject.tag == "Ground")
-            Debug.Log("There is an object here: " + other);
+        if (other.gameObject.tag == "Enemy")
+        {
+            //Send message?
+            other.GetComponent<Enemy>().targeted = false;
+        }
     }
 }
 

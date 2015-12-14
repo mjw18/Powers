@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
 
 public class CreateEnemyConfig
@@ -10,3 +11,4 @@ public class CreateEnemyConfig
         CreateConfig.DoCreateConfig<EnemyConfig>();
     }
 }
+#endif

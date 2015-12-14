@@ -8,6 +8,8 @@ public class PowerConfig : ScriptableObject
     public float duration;
     public float energyCost;
     public float range;
+    //If not set, will select single target acquisition
+    public float effectRadius = -2.0f;
 
     [System.Serializable]
     public class AbilityVisualEffect

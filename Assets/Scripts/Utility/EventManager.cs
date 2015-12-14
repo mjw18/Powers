@@ -74,20 +74,21 @@ public class EventManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("No listeners for this event");
-            Debug.Log(message);
+            Debug.Log("No listeners for this event: " + message);
         }
     }
 
     public enum MessageKey
     {
-        Destroy,
         Pause,
         ShakeCamera,
         Test,
+        EnemyDamaged,
         EnemyDied,
         ChargeHit,
-        LaserHit
+        LaserHit,
+        PlayerRespawned,
+        PlayerDied
     };
 }
 

@@ -28,12 +28,14 @@ public class Regulator : MonoBehaviour {
 	void Update ()
     {
         float cur = Time.realtimeSinceStartup;
-
+        
         if (m_timing) UpdateTimer();
 
         deltaTime = cur - m_deltaLastTime;
         m_deltaLastTime = cur;
-	}
+
+        //Debug.Log("FPS: " + 1 / realDeltaTime);
+    }
 
     //Udate Timer Independent of Time.timescale
     void UpdateTimer()
