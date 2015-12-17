@@ -10,25 +10,36 @@ public class HandLaser : Power {
     void Awake()
     {
         base.Init();
-        m_ShootPosition = player.GetComponent<Player>().shootPosition;
+        m_ShootPosition = player.shootPosition;
     }
 
     public override void Execute()
     {
         base.Execute();
 
+        //Default charge direction is forward
+        Vector3 rayToTarget = shootDirection * player.facing;
+
+        //Get ray to chosen target
+        if (targetSelector.targets.Count > 0)
+        {
+            Debug.Log(targetSelector.targets[0]);
+            rayToTarget = targetSelector.targets[0].transform.position - m_Player.transform.position;
+        }
+
         GameObject laser = GameManager.instance.laserShotPool.NextPooledObject(false);
         laser.transform.position = m_ShootPosition.position;
-        laser.GetComponent<ShotMover>().shotDirection = shootDirection * player.facing;
+        laser.transform.LookAt(target);
+        Debug.Log("Laser Shot Rotation: " + laser.transform.rotation);
+        laser.GetComponent<ShotMover>().shotDirection = Vector3.Normalize(rayToTarget) * player.facing;
         laser.SetActive(true);
 
-        LayerMask enemyLayerMask = LayerMask.GetMask("Ground");
         Ray laserRay = new Ray();
         laserRay.origin = m_ShootPosition.position;
         //laserRay.direction = Vector3.right * m_Player.facing;
 
         //Store raycast hit
-        RaycastHit2D laserHit = Physics2D.Raycast(laserRay.origin, laserRay.direction, powerConfig.range, enemyLayerMask);
+        RaycastHit2D laserHit = Physics2D.Raycast(laserRay.origin, laserRay.direction, powerConfig.range);
 
         if (!laserHit)
         {

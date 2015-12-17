@@ -66,49 +66,42 @@ public class PlayerController : MonoBehaviour {
             Debug.Log(string.Format("My delta time: {0} \n Unity delta time: {1}", m_LaserRegulator.realDeltaTime, Time.deltaTime));
 
             m_SlowingTime = true;
-            StartCoroutine(SlowTimeScale(0.3f));
+            //StartCoroutine(SlowTimeScale(0.3f));
         }
-      /*  if (!Input.GetKey(KeyCode.LeftControl) && Time.timeScale <= 0.98)
+        /*  if (!Input.GetKey(KeyCode.LeftControl) && Time.timeScale <= 0.98)
+          {
+              StartCoroutine(ResetTimeScale());
+          }*/
+        if(Input.GetButtonDown("Jump"))
         {
-            StartCoroutine(ResetTimeScale());
-        }*/
-
+            Jump();
+        }
+        if (Input.GetKeyDown(primaryPowerKey))
+        {
+            if (m_Player.UseEnergy(primaryPower.powerConfig.energyCost))
+            {
+                if (primaryPower != null) StartCoroutine(primaryPower.UsePower());
+                    //primaryPower.Execute();
+            }
+        }
+        else if (Input.GetKeyDown(secondaryPowerKey))
+        {
+            if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost))
+            {
+                if (secondaryPower != null) StartCoroutine(secondaryPower.UsePower());
+            }
+        }
     }
 
     void FixedUpdate()
     {
         float horz = Input.GetAxis("Horizontal");
-        bool jump = Input.GetButtonDown("Jump");
 
         bool m_CanMove = true;
         if (m_CanMove)
         {
-            MoveManager(horz, jump);
+            MoveManager(horz);
         }
-
-        if (Input.GetKeyDown(primaryPowerKey))
-        {
-            if (m_Player.UseEnergy(primaryPower.powerConfig.energyCost))
-            {
-                if (primaryPower != null)
-                    primaryPower.Execute();
-
-                //ChargeAttack();
-            }
-        }
-        else if (Input.GetKeyDown(secondaryPowerKey))
-        {
-            Debug.Log(secondaryPower.powerConfig);
-
-            if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost))
-            {
-                if (secondaryPower != null)
-                    secondaryPower.Execute();
-
-                //HandLaser();
-            }
-        }
-
     }
 
     //Flips player facing if neccessary
@@ -123,18 +116,18 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void MoveManager(float horz, bool jump)
+    void MoveManager(float horz)
     {
         Flip(horz);
         Vector2 playerVelocity = Vector2.right * m_Player.maxSpeed * horz;
         Vector2 currentVel = new Vector2(playerVelocity.x, m_rigidbody.velocity.y);
         m_rigidbody.velocity = currentVel;
+    }
 
-        if (jump && m_Player.CheckGrounded())
-        {
+    void Jump()
+    {
+        if(m_Player.grounded)
             m_rigidbody.AddForce(m_Player.jumpForce * Vector2.up);
-            m_Player.grounded = false;
-        }
     }
 
     IEnumerator SmoothMove(RaycastHit2D target)
@@ -148,49 +141,5 @@ public class PlayerController : MonoBehaviour {
 
             yield return null;
         }
-
-        //Reached target, add force. Move this into function?
-       /* Debug.Log("Reached Target");
-        enemy.GetComponent<Rigidbody2D>().AddForce(-Vector3.Normalize(target.normal) * ChargeData.chargeForce, ForceMode2D.Impulse);
-        m_rigidbody.velocity = Vector2.zero;
-        target.collider.gameObject.GetComponent<Enemy>().ApplyDamage(ChargeData.damage); //Apply damage*/
     }
-
-    IEnumerator SlowTimeScale(float slowFactor)
-    {
-        float rate = 15f;
-
-        while(Time.timeScale >= (slowFactor + 0.01f))
-        {
-            Time.timeScale = Easing.EaseOut(Time.timeScale, slowFactor, rate * m_LaserRegulator.realDeltaTime, EasingType.Quadratic);
-            Debug.Log(Time.timeScale);
-            yield return null;
-        }
-        Debug.Log(Time.timeScale);
-
-        yield return null;
-        /*while(Input.GetKey(KeyCode.LeftControl))
-        {
-            yield return null;
-        }
-        yield return StartCoroutine(ResetTimeScale());*/
-    }
-
-    IEnumerator ResetTimeScale()
-    {
-        float rate = 15f;
-        Debug.Log("Speeding back up");
-        while (Time.timeScale < 1 - 0.1f)
-        {
-            Time.timeScale = Easing.EaseIn(Time.timeScale, 1, rate * m_LaserRegulator.realDeltaTime, EasingType.Quintic);
-            Debug.Log(Time.timeScale);
-            yield return null;
-        }
-
-        m_SlowingTime = false;
-        Time.timeScale = 1f;
-        Debug.Log("FullSpeed: " + Time.timeScale);
-        yield return null;
-    }
-
 }

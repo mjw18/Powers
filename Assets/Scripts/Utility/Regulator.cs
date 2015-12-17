@@ -22,7 +22,6 @@ public class Regulator : MonoBehaviour {
 	void Awake ()
     {
         m_startTime = Time.realtimeSinceStartup;
-        //this.enabled = false;
 	}
 	
 	void Update ()
@@ -33,8 +32,6 @@ public class Regulator : MonoBehaviour {
 
         deltaTime = cur - m_deltaLastTime;
         m_deltaLastTime = cur;
-
-        //Debug.Log("FPS: " + 1 / realDeltaTime);
     }
 
     //Udate Timer Independent of Time.timescale
@@ -44,23 +41,21 @@ public class Regulator : MonoBehaviour {
         m_timer += currentTime - m_lastTime;
         m_lastTime = currentTime;
     }
-    
+
+    //Use Start Timer to begin timing
     public void StartTimer()
     {
-        //this.enabled = true;
         m_startTime = Time.realtimeSinceStartup;
         m_timer = 0f;
         m_lastTime = m_startTime;
         m_timing = true;
     }
 
+    //Use Check Timer, returns boolean if waitTime has passed since calling startTimer
     public bool CheckTimer()
     {
         if(m_timer >= waitTime)
         {
-            //try with returns only instead of boolean flags
-            //canUse = true;
-
             //stop timer
             StopTimer();
             //return true
@@ -70,11 +65,44 @@ public class Regulator : MonoBehaviour {
         return false;
     }
 
+    //Stops timer and resets time value
     public void StopTimer()
     {
         m_timer = 0;
         m_timing = false;
-        //this.enabled = false;
     }
 
+    public IEnumerator SlowTimeScale(float slowFactor, float duration, Easing.EasingFunction easingFunc, EasingType easeType = EasingType.Linear )
+    {
+        float rate = 1f / duration;
+        float t = 0.0f;
+        float tempScale = Time.timeScale;
+
+        while (t <= 1f)
+        {
+            Time.timeScale = Easing.InterpolateFloat(tempScale, slowFactor, t, easeType, easingFunc);
+            //Multiply by real time delta Time
+            t += rate * deltaTime;
+            yield return null;
+        }
+        yield return null;
+    }
+
+    public IEnumerator ResetTimeScale(float duration, Easing.EasingFunction easingFunc, EasingType easeType = EasingType.Linear)
+    {
+        float rate = 1f / duration;
+        float t = 0.0f;
+        float tempScale = Time.timeScale;
+
+        while (t <= 1f)
+        {
+            Time.timeScale = Easing.InterpolateFloat(tempScale, 1f, t, easeType, easingFunc);
+            //Mult by real Time delta time
+            t += rate * deltaTime;
+            yield return null;
+        }
+
+        if (Time.timeScale != 1f) Time.timeScale = 1f;
+        yield return null;
+    }
 }

@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     //Ground checking, move to separate script to attach to other entities
     private bool m_grounded = false;
     public float groundCheckRadius = 0.1f;
+    public LayerMask whatIsGround;
     private Transform m_GroundCheck;
 
     public bool grounded
@@ -68,19 +69,26 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        //Move all this to separate script
-        Collider2D[] cols = Physics2D.OverlapCircleAll(m_GroundCheck.position, groundCheckRadius);
-        foreach (Collider2D col in cols)
-        {
-            //Still don't like these strings
-            if (col.gameObject.tag != "Ground")
-            {
-                continue;
-            }
+        m_grounded = false;
+        // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
+        // This can be done using layers instead but Sample Assets will not overwrite your project settings.
 
-            m_grounded = true;
-            break;
+        m_grounded = CheckGround();
+    }
+
+    bool CheckGround()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, groundCheckRadius, whatIsGround);
+
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i].gameObject != gameObject)
+            {
+                //So we don't have to check all circlecasted objects
+                return true;
+            }
         }
+        return false;
     }
 
     //Usse player energy, return true if power can be used

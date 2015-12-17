@@ -50,6 +50,7 @@
      <Compile Include="Assets\Scripts\Entity\Enemy\Enemy.cs" />
      <Compile Include="Assets\Scripts\Entity\Enemy\EnemyConfig.cs" />
      <Compile Include="Assets\Scripts\Entity\HealthBarController.cs" />
+     <Compile Include="Assets\Scripts\Entity\PlatformMover.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\Player.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\PlayerController.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\PlayerDefaultState.cs" />

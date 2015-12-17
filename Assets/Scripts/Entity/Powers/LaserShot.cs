@@ -31,8 +31,9 @@ public class LaserShot : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if(!other.gameObject.CompareTag("Player") && other.gameObject.tag != "TargetSelector")
+        if(other.gameObject != gameObject && !other.gameObject.CompareTag("Player") && other.gameObject.tag != "TargetSelector")
         {
+            Debug.Log(transform.position);
             //Resets the lifetime timer
             m_LifeTimer.StopTimer();
             DestroyLaserShot();

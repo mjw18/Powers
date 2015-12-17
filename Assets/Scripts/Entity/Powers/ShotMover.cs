@@ -21,28 +21,24 @@ public class ShotMover : MonoBehaviour {
             //Debug.Log("This is so clearly wrong, fix it");
         }
 	}
-	
-	void Update ()
-    {
-        //m_Transform.Translate(shotDirection * Time.deltaTime * speed);	
-	}
 
     void OnEnable()
     {
-        StartCoroutine(MoveLaser(shotDirection * 7f));
+        StopAllCoroutines();
+        StartCoroutine(MoveLaser());
     }
 
-    IEnumerator MoveLaser(Vector3 destination)
+    IEnumerator MoveLaser()
     {
-        float t = 0.6f;
+        float t = 0.0f;
         Vector3 tempPos = m_Transform.position;
         //The rate to add to the t value (1/s)
         float rate = speed / 7f;
-        Vector3 offset = Easing.InterpolateVector(tempPos, destination, 0.1f, e, easeFunction);
+        Vector3 offset = Easing.InterpolateVector(tempPos, shotDirection * 17f, 0.1f, e, easeFunction);
 
-        while ( t <= 1)
+        while ( t <= 1 )
         {
-            m_Transform.position = Easing.InterpolateVector(offset, destination, t, e, easeFunction) - offset;
+            m_Transform.position = Easing.InterpolateVector(tempPos, shotDirection * 17f , t, e, easeFunction);
             t += rate * Time.deltaTime;
             yield return null;
         }

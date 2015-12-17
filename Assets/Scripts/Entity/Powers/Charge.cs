@@ -31,7 +31,7 @@ public class Charge : Power {
             Debug.Log(targetSelector.targets[0]);
             rayToTarget = targetSelector.targets[0].transform.position - m_Player.transform.position;
         }
-        GameObject hitObj = null;;
+        GameObject hitObj = null;
         //Change to Crcle Cast to avoid glitches where player warps through walls?
         RaycastHit2D hit = Physics2D.Raycast(player.shootPosition.position, rayToTarget, powerConfig.range);
         if (hit) hitObj = hit.collider.gameObject;
@@ -40,6 +40,7 @@ public class Charge : Power {
         //If there is an object between the player and target
         if(!hitObj)
         {
+            Debug.Log(rayToTarget);
             StartCoroutine(MoveToTarget(m_Player, Vector3.Normalize(rayToTarget) * powerConfig.range));
         }
         else if (!hitObj.CompareTag("Enemy"))
