@@ -20,46 +20,25 @@ public class HandLaser : Power {
         //Default charge direction is forward
         Vector3 rayToTarget = shootDirection * player.facing;
 
-        //Get ray to chosen target
+        //Get ray to chosen target, change to use DamageType
         if (targetSelector.targets.Count > 0)
         {
-            Debug.Log(targetSelector.targets[0]);
-            rayToTarget = targetSelector.targets[0].transform.position - m_Player.transform.position;
+            //Store target in power
+            target = targetSelector.targets[0].GetComponent<Transform>();
+
+            //Get ray from player to taget
+            rayToTarget = target.position - m_Player.transform.position;
         }
 
         GameObject laser = GameManager.instance.laserShotPool.NextPooledObject(false);
+
         laser.transform.position = m_ShootPosition.position;
-        laser.transform.LookAt(target);
-        Debug.Log("Laser Shot Rotation: " + laser.transform.rotation);
-        laser.GetComponent<ShotMover>().shotDirection = Vector3.Normalize(rayToTarget) * player.facing;
+
+        laser.transform.LookAt(m_Player.transform.position + rayToTarget);
+        Debug.Log(rayToTarget);
+        Debug.Log(Vector3.Normalize(rayToTarget) * player.facing);
+        laser.GetComponent<ShotMover>().shotDirection = Vector3.Normalize(rayToTarget);
         laser.SetActive(true);
-
-        Ray laserRay = new Ray();
-        laserRay.origin = m_ShootPosition.position;
-        //laserRay.direction = Vector3.right * m_Player.facing;
-
-        //Store raycast hit
-        RaycastHit2D laserHit = Physics2D.Raycast(laserRay.origin, laserRay.direction, powerConfig.range);
-
-        if (!laserHit)
-        {
-            Debug.Log("Raycast returns null");
-            //Draw a big line (FIX THIS I ADDED A RANDOM 5 FOR GRINS)
-           // shootDirection = m_ShootPosition.position + powerConfig.range * laserRay.direction * 5f;
-        }
-        else if (laserHit.collider.tag == "Player")
-        {
-            Debug.Log("You are hitting the player with this linecast");
-        }
-        else if (laserHit.collider.tag == "Enemy")
-        {
-            Debug.Log("You are hitting the enemy with this linecast");
-            EventManager.PostMessage(EventManager.MessageKey.LaserHit);
-            laserHit.transform.gameObject.GetComponent<Enemy>().ApplyDamage(powerConfig.damage); ;
-
-            //End Laser shot at enemy
-          // hitPosition = laserHit.transform.position;
-        }
     }
 
     public void OnLaserHit(Collider2D col)

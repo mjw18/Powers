@@ -9,6 +9,8 @@ public class Player : MonoBehaviour
     public float jumpForce = 100f;
     public int facing = 1;
 
+    public bool canMove = true;
+
     public float maxEnergy = 30.0f;
     public float energyRechargeRate = 3f;
     public float energy;

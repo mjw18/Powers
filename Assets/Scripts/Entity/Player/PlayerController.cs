@@ -9,11 +9,7 @@ public class PlayerController : MonoBehaviour {
     public Power primaryPower;
     public Power secondaryPower; 
 
-    //Remove this!!! Use beefed up Coroutine to add Stop or checks for already running
-    private bool m_SlowingTime = false;
-
     public GameObject particles;
-
     public ParticleSystem activeParticles;
     private Player m_Player;
 
@@ -37,17 +33,13 @@ public class PlayerController : MonoBehaviour {
         m_ShootPosition = GameObject.Find("ShootPosition").transform;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
 
+        //This obviously should change to include other powers/UI
         primaryPower = GetComponent<HandLaser>();
         secondaryPower = GetComponent<Charge>();
 
-        if(!m_ShootPosition)
-        {
-            Debug.Log("ShootPosition not found");
-        }
-
         //Fuck using strings though
         chargeTimeText = GameObject.Find("EnergyText").GetComponent<Text>();
-        if(chargeTimeText == null)
+        if(!chargeTimeText)
         {
             Debug.Log("Charge text not set. CHANGE THIS THIS SUCKS");
         }
@@ -55,40 +47,31 @@ public class PlayerController : MonoBehaviour {
         chargeTimeText.text = "Energy: " + m_Player.energy;
 	}
 	
-	// Update is called once per frame
 	void Update ()
     {
         //Update text
         chargeTimeText.text = string.Format("Energy: {0}", (int)m_Player.energy ); 
 
-        if(Input.GetKeyDown(KeyCode.LeftControl) && !m_SlowingTime)
-        {
-            Debug.Log(string.Format("My delta time: {0} \n Unity delta time: {1}", m_LaserRegulator.realDeltaTime, Time.deltaTime));
-
-            m_SlowingTime = true;
-            //StartCoroutine(SlowTimeScale(0.3f));
-        }
-        /*  if (!Input.GetKey(KeyCode.LeftControl) && Time.timeScale <= 0.98)
-          {
-              StartCoroutine(ResetTimeScale());
-          }*/
-        if(Input.GetButtonDown("Jump"))
+        if(Input.GetButtonDown("Jump") && m_Player.canMove)
         {
             Jump();
         }
+        
+        //Doesn't check for power in use soon enough
+        //Add null check on power in case one is not used
         if (Input.GetKeyDown(primaryPowerKey))
         {
-            if (m_Player.UseEnergy(primaryPower.powerConfig.energyCost))
+            if (m_Player.UseEnergy(primaryPower.powerConfig.energyCost) && primaryPower.canUsePower)
             {
-                if (primaryPower != null) StartCoroutine(primaryPower.UsePower());
+                if (primaryPower) StartCoroutine(primaryPower.UsePower());
                     //primaryPower.Execute();
             }
         }
         else if (Input.GetKeyDown(secondaryPowerKey))
         {
-            if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost))
+            if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost) && secondaryPower.canUsePower)
             {
-                if (secondaryPower != null) StartCoroutine(secondaryPower.UsePower());
+                if (secondaryPower) StartCoroutine(secondaryPower.UsePower());
             }
         }
     }
@@ -97,8 +80,7 @@ public class PlayerController : MonoBehaviour {
     {
         float horz = Input.GetAxis("Horizontal");
 
-        bool m_CanMove = true;
-        if (m_CanMove)
+        if (m_Player.canMove)
         {
             MoveManager(horz);
         }
@@ -128,18 +110,5 @@ public class PlayerController : MonoBehaviour {
     {
         if(m_Player.grounded)
             m_rigidbody.AddForce(m_Player.jumpForce * Vector2.up);
-    }
-
-    IEnumerator SmoothMove(RaycastHit2D target)
-    {
-        GameObject enemy = target.collider.gameObject;
-        Vector3 originalPos = enemy.transform.position;
-
-        while((Vector3.Distance(originalPos, transform.position)) > 0.5f)
-        { 
-            transform.position = Vector3.Lerp(transform.position, originalPos, 8f * Time.deltaTime);
-
-            yield return null;
-        }
     }
 }

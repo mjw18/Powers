@@ -15,6 +15,12 @@ public class Power : MonoBehaviour {
 
     public PowerConfig powerConfig;
 
+    private bool m_UsingPower = false;
+    public bool canUsePower
+    {
+        get { return !m_UsingPower; }
+    }
+
     public GameObject m_Player;
     public Transform target;
     protected TargetSelector targetSelector;
@@ -103,6 +109,8 @@ public class Power : MonoBehaviour {
 
     public IEnumerator UsePower()
     {
+        m_UsingPower = true;
+
         yield return StartCoroutine( refRegulator.SlowTimeScale(slowTime, slowTimeDuration, Easing.EaseOut, timeEaseType) );
         yield return StartCoroutine( AcquireTarget() );
         yield return StartCoroutine( refRegulator.ResetTimeScale(speedTimeDuration, Easing.EaseOut, timeEaseType));
@@ -134,6 +142,8 @@ public class Power : MonoBehaviour {
         {
             effect.visualEffect.PlayEffect();
         }
+
+        m_UsingPower = false;
 
     }
 

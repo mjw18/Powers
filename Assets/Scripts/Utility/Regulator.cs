@@ -45,6 +45,9 @@ public class Regulator : MonoBehaviour {
     //Use Start Timer to begin timing
     public void StartTimer()
     {
+        //Cant start a running timer
+        if (m_timing) return;
+
         m_startTime = Time.realtimeSinceStartup;
         m_timer = 0f;
         m_lastTime = m_startTime;

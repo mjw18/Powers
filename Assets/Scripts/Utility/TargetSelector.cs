@@ -51,7 +51,7 @@ public class TargetSelector : MonoBehaviour {
         foreach (Collider2D col in cols)
         {
             //Fix this, I hate strings. Use a layermask in overlap
-            if(col.gameObject.tag != "Ground" && col.gameObject != gameObject)
+            if(col.CompareTag(Tags.enemy) || col.CompareTag(Tags.interactable) && col.gameObject != gameObject)
             {
                 targets.Add(col.gameObject);
             }
@@ -60,7 +60,7 @@ public class TargetSelector : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if(other.gameObject.tag == "Enemy")
+        if(other.CompareTag(Tags.enemy))
         {
             other.GetComponent<Enemy>().targeted = true;
         }
@@ -68,7 +68,7 @@ public class TargetSelector : MonoBehaviour {
 
     void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Enemy")
+        if (other.CompareTag(Tags.enemy))
         {
             //Send message?
             other.GetComponent<Enemy>().targeted = false;
