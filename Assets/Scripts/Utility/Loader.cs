@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ExtendedEvents;
 using System.Collections;
 
 public class Loader : MonoBehaviour

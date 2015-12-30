@@ -14,6 +14,7 @@ public class Power : MonoBehaviour {
     protected KeyCode keyCode;
 
     public PowerConfig powerConfig;
+    public PowerUsageMode usageMode = PowerUsageMode.Unassigned;
 
     private bool m_UsingPower = false;
     public bool canUsePower
@@ -53,6 +54,9 @@ public class Power : MonoBehaviour {
         {
             SetEffectPosition(effect.visualEffect, effect.placement, effect.offset);
         }
+
+        if (usageMode == PowerUsageMode.Unassigned) Debug.Log("not yet");
+        else SetKey();
     }
 
     //Use AbilityVisualEffect Offset
@@ -107,7 +111,7 @@ public class Power : MonoBehaviour {
         targetSelector.gameObject.SetActive(false);
     }
 
-    public IEnumerator UsePower()
+    public IEnumerator UsePrimaryPower()
     {
         m_UsingPower = true;
 
@@ -124,16 +128,44 @@ public class Power : MonoBehaviour {
 
         while (!Input.GetMouseButtonDown(0))
         {
+            //If user presses key again, exit. Switch later to hold and release
+            if (Input.GetKeyDown(keyCode))
+            {
+                Debug.Log("Breaking");
+                targetSelector.gameObject.SetActive(false);
+                yield break;
+            }
+
             yield return null;
         }
 
-        Debug.Log("The Mouse Button has been pressed and targets have been added"); 
+        //Mouse has been pressed and targets have been added
         targetSelector.SelectTargets();
-        Debug.Log(targetSelector.targets.Count);
         targetSelector.gameObject.SetActive(false);
         
         //Write new yield command
         yield return new WaitForSeconds(0.2f);
+    }
+
+    public void SetKey()
+    {
+        switch(usageMode)
+        {
+            case PowerUsageMode.Primary:
+                keyCode = m_Player.GetComponent<PlayerController>().primaryPowerKey;
+                break;
+            case PowerUsageMode.Secondary:
+                keyCode = m_Player.GetComponent<PlayerController>().secondaryPowerKey;
+                break;
+        }
+    }
+
+    void Update()
+    {
+        if(Input.GetKeyDown("t"))
+        {
+            StopAllCoroutines();
+        }
     }
 
     virtual public void Execute()
@@ -147,4 +179,16 @@ public class Power : MonoBehaviour {
 
     }
 
+    public enum PowerUsageMode
+    {
+        Primary,
+        Secondary,
+        Defensive,
+        Passive,
+        Unassigned
+    }
 }
+
+
+
+

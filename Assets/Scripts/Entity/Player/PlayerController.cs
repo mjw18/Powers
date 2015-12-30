@@ -35,7 +35,12 @@ public class PlayerController : MonoBehaviour {
 
         //This obviously should change to include other powers/UI
         primaryPower = GetComponent<HandLaser>();
+        primaryPower.usageMode = Power.PowerUsageMode.Primary;
         secondaryPower = GetComponent<Charge>();
+        secondaryPower.usageMode = Power.PowerUsageMode.Secondary;
+
+        //primaryPower.SetKey();
+        //secondaryPower.SetKey();
 
         //Fuck using strings though
         chargeTimeText = GameObject.Find("EnergyText").GetComponent<Text>();
@@ -63,15 +68,14 @@ public class PlayerController : MonoBehaviour {
         {
             if (m_Player.UseEnergy(primaryPower.powerConfig.energyCost) && primaryPower.canUsePower)
             {
-                if (primaryPower) StartCoroutine(primaryPower.UsePower());
-                    //primaryPower.Execute();
+                if (primaryPower) StartCoroutine(primaryPower.UsePrimaryPower());
             }
         }
         else if (Input.GetKeyDown(secondaryPowerKey))
         {
             if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost) && secondaryPower.canUsePower)
             {
-                if (secondaryPower) StartCoroutine(secondaryPower.UsePower());
+                if (secondaryPower) StartCoroutine(secondaryPower.UsePrimaryPower());
             }
         }
     }

@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
+using ExtendedEvents;
 using UnityEngine.UI;
 using System.Collections;
 
 public class Enemy : MonoBehaviour {
 
     public EnemyConfig config;
-    public EnemyData refData;
+    public EnemyData refData; //> CHange this, its kinda dumb
 
     public bool targeted;
 
@@ -15,19 +16,12 @@ public class Enemy : MonoBehaviour {
     public Color healthBarColor = Color.red;
     public ParticleSystem DeathParticles;
 
-	// Use this for initialization
 	void Awake ()
     {
         refData = new EnemyData(config.data);
         m_HealthBar = GetComponentInChildren<HealthBarController>();
         m_FillImage.color = healthBarColor;
 	}
-	
-	// Update is called once per frame
-	void LateUpdate ()
-    {
-
-    }
 
     //Deal specified damage to enemy, kill if health below 0
     public void ApplyDamage(float damage)
@@ -35,7 +29,7 @@ public class Enemy : MonoBehaviour {
         StartCoroutine(MoveHealthBar(damage));
 
         refData.health -= damage;
-        EventManager.PostMessage(EventManager.MessageKey.EnemyDamaged);
+        EventManager.PostMessage(MessageKey.EnemyDamaged);
 
         if (refData.health <= float.Epsilon)
         {
@@ -47,11 +41,20 @@ public class Enemy : MonoBehaviour {
         }
     }
 
+    //Deactivate enemy
     public void Kill()
     {
-        EventManager.PostMessage(EventManager.MessageKey.EnemyDied);
+        EventManager.PostMessage(MessageKey.EnemyDied);
         Instantiate(DeathParticles, transform.position, Quaternion.identity);
-        Destroy(gameObject);
+        gameObject.SetActive(false);
+    }
+
+    //Reuse inactive pooled enemy blob. Reset health value and health bar, then set active
+    public void Respawn()
+    {
+        refData.health = config.data.health;
+        m_Slider.value = refData.health;
+        gameObject.SetActive(true);
     }
 
     IEnumerator MoveHealthBar(float damage, float duration = 0.6f)

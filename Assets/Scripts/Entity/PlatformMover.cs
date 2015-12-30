@@ -84,13 +84,11 @@ public class PlatformMover : MonoBehaviour
 
         if (m_Transform.position.y - (m_StartPos.y + distance) >= 0)
         {
-            Debug.Log("Moving Platform down");
             m_SliderJoint.angle = m_Direction * 90f;
 
         }
         else
         {
-            Debug.Log("MovingPlatform up now");
             m_SliderJoint.angle = -1 * m_Direction * 90;
         }
     }

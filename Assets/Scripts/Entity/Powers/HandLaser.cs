@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 
 public class HandLaser : Power {
@@ -11,12 +12,13 @@ public class HandLaser : Power {
     {
         base.Init();
         m_ShootPosition = player.shootPosition;
+
+        UnityAction<int> onLaserHitAction = OnLaserHit;
+        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.LaserHit, onLaserHitAction);
     }
 
     public override void Execute()
     {
-        base.Execute();
-
         //Default charge direction is forward
         Vector3 rayToTarget = shootDirection * player.facing;
 
@@ -27,33 +29,45 @@ public class HandLaser : Power {
             target = targetSelector.targets[0].GetComponent<Transform>();
 
             //Get ray from player to taget
-            rayToTarget = target.position - m_Player.transform.position;
+            RaycastHit2D hit = Physics2D.Raycast(m_ShootPosition.position, 
+                                                 target.position - m_Player.transform.position, 
+                                                 powerConfig.range);
+
+            rayToTarget = hit.point - (Vector2)m_ShootPosition.position;
         }
 
-        GameObject laser = GameManager.instance.laserShotPool.NextPooledObject(false);
+        GameObject laser = GameManager.instance.m_LaserShotPool.NextPooledObject(false);
 
         laser.transform.position = m_ShootPosition.position;
 
         laser.transform.LookAt(m_Player.transform.position + rayToTarget);
-        Debug.Log(rayToTarget);
-        Debug.Log(Vector3.Normalize(rayToTarget) * player.facing);
         laser.GetComponent<ShotMover>().shotDirection = Vector3.Normalize(rayToTarget);
         laser.SetActive(true);
+
+        base.Execute();
     }
 
-    public void OnLaserHit(Collider2D col)
+    public void OnLaserHit(int hitID)
     {
+        GameObject hitObj = GameManager.instance.entityTable.GetEntityFromID(hitID);
+
+        if(!hitObj)
+        {
+            Debug.Log("Entity ID not registered");
+            return;
+        }
+
         foreach (var effect in powerConfig.visualEffects)
         {
             if(effect.placement == VisualEffectPlacement.CenteredAtTarget)
             {
-                effect.visualEffect.SetPosition(col.gameObject.transform.position);
+                effect.visualEffect.SetPosition(hitObj.transform.position);
             }
         }
 
-        if (col.gameObject.tag == "Enemy")
+        if (hitObj.CompareTag(Tags.enemy) )
         {
-            col.GetComponent<Enemy>().ApplyDamage(powerConfig.damage);
+            hitObj.GetComponent<Enemy>().ApplyDamage(powerConfig.damage);
         }
     }
 }

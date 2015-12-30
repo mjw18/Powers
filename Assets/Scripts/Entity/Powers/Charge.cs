@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ExtendedEvents;
 using System.Collections;
 
 public class Charge : Power {
@@ -47,7 +48,7 @@ public class Charge : Power {
         {
             StartCoroutine(MoveToTarget(m_Player, hit.point, hitObj));
             //Move to Visual Effects?
-            EventManager.PostMessage(EventManager.MessageKey.ShakeCamera);
+            EventManager.PostMessage(MessageKey.ShakeCamera);
         }
         else
         {
@@ -83,7 +84,7 @@ public class Charge : Power {
             hitObj.GetComponent<Rigidbody2D>().AddForce(Vector3.Normalize(rayToTarget) * chargeForce, ForceMode2D.Impulse);
         }
 
-        EventManager.PostMessage(EventManager.MessageKey.ChargeHit);
+        EventManager.PostMessage(MessageKey.ChargeHit);
     }
 
     //It would be great to not hae to keep writing this over and over (look into retunr values/out params)

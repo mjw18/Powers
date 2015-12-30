@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ExtendedEvents;
 using System.Collections;
 
 public class Player : MonoBehaviour
@@ -117,7 +118,7 @@ public class Player : MonoBehaviour
 
     public void OnPlayerDied()
     {
-        EventManager.PostMessage(EventManager.MessageKey.PlayerDied);
+        EventManager.PostMessage(MessageKey.PlayerDied);
         gameObject.SetActive(false);
     }
 }

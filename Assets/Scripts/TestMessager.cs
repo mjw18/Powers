@@ -1,27 +1,29 @@
 ﻿using UnityEngine;
+using ExtendedEvents;
 using UnityEngine.Events;
 using System.Collections;
 
 public class TestMessager : MonoBehaviour {
 
-    private UnityAction testAction;
-
-	void Awake ()
+	void Start ()
     {
-        testAction = new UnityAction(TestMessage);
-	}
-
-    void OnEnable()
-    {
-        if(EventManager.instance == null)
+        UnityAction<System.DBNull> testAction = TestMessage;
+        if (EventManager.instance == null)
         {
             Debug.Log("No instance of Event Managet");
         }
-        EventManager.RegisterListener(EventManager.MessageKey.Test, testAction);
+
+        Debug.Log("Registering...");
+        EventManager.RegisterListener(MessageKey.Test, testAction);
     }
 
-    void TestMessage()
+    void OnEnable()
     {
-        Debug.Log("The Test Worked!!!");
+        
+    }
+
+    void TestMessage(System.DBNull t)
+    {
+        Debug.Log(string.Format("It worked (maybe). Here's the param: {0}" , 9));
     }
 }

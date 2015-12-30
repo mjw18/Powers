@@ -11,7 +11,7 @@ public class ObjectPool : MonoBehaviour{
 
     void Awake()
     {
-        InitPool();
+        //InitPool();
     }
 
     public void InitPool()
@@ -22,6 +22,7 @@ public class ObjectPool : MonoBehaviour{
         {
             GameObject temp = Instantiate(pooledObject) as GameObject;
             objectPool.Add(temp);
+            temp.transform.SetParent(GetComponentInParent<Transform>());
             temp.SetActive(false);
         }
     }
@@ -77,10 +78,6 @@ public class ObjectPool : MonoBehaviour{
             objectPool.RemoveAt(lastIndex);
             Destroy(t);
         }
-    }
-
-    void Update()
-    {
     }
 
     void OnDestroy()

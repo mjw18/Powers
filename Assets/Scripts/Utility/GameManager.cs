@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ExtendedEvents;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
@@ -8,20 +9,20 @@ public class GameManager : MonoBehaviour {
     public static GameManager instance;
 
     public GameObject player;
-    public GameObject enemy;
     private Text killCount;
 
     public Vector3 playerSpawn;
     public Vector3 enemySpawn;
 
-    //Move to enemy class as static list
-    public List<Enemy> enemies;
+    //This s strictly code. Is that okay? Make static class/singleton?
+    public EntityHashTable entityTable;
 
     public float respawnTime = 1f;
 
     private GameObject m_Player;
 
-    public ObjectPool laserShotPool;
+    public ObjectPool m_EnemyPool;
+    public ObjectPool m_LaserShotPool;
 
     public Regulator globalRegulator;
 
@@ -43,20 +44,14 @@ public class GameManager : MonoBehaviour {
 
         DontDestroyOnLoad(gameObject);
 
-        enemies = new List<Enemy>();
-        if (!laserShotPool) laserShotPool = GetComponent<ObjectPool>();
-
         globalRegulator = GetComponent<Regulator>();
 
+        //Run Level Init (?) from inside GM
+        //Mov to readng a LevelConfig?
         Init();
-	}
 
-    /*void OnLevelWasLoaded()
-    {
-        Debug.Log("LoadedLevel");
-        Init();
-        laserShotPool.InitPool();
-    }*/
+        InitLevel();
+	}
 
     void OnDestroy()
     {
@@ -76,15 +71,10 @@ public class GameManager : MonoBehaviour {
         if(!m_Player.activeSelf)
         {
             RespawnPlayer();
-            //Invoke("RespawnPlayer", 1f);
-        }
-        if (Input.GetKeyDown("r"))
-        {
-            Restart();
         }
     }
 
-    //Spawn Enemies and Player at predifined spawn points. Use Scriptable object for level config here?
+    //Do Game Initialization. Don't Do level Init
     void Init()
     {
         RegisterListeners();
@@ -97,7 +87,26 @@ public class GameManager : MonoBehaviour {
         }
         killCount.text = "Kills: " + m_KillCount;
 
-        enemies.Clear();
+        //Fix this with const string or with a get component in children?
+        m_EnemyPool = GameObject.Find("BasicBlobPool").GetComponent<ObjectPool>();
+        //Must init manually to ensure that entity hash inits after
+        m_EnemyPool.InitPool();
+
+        m_LaserShotPool = GameObject.Find("LaserShotPool").GetComponent<ObjectPool>();
+        m_LaserShotPool.InitPool();
+
+        if (m_EnemyPool == null) Debug.Log("Pool not intialized?");
+
+        //Make this its own GameObject? Is that redundant?
+        //Dont want to keep on GameManager since GM doesnt destroy on load (This might be 
+        //what i want to happen
+        entityTable = new EntityHashTable();
+        entityTable.Init();
+    }
+
+    //Spawn Enemies and Player at predifined spawn points. Use Scriptable object for level config here?
+    void InitLevel()
+    {
         SpawnPlayer();
         SpawnEnemies();
     }
@@ -108,7 +117,7 @@ public class GameManager : MonoBehaviour {
         UnityEngine.Events.UnityAction deathAction = new UnityEngine.Events.UnityAction(OnEnemyDeath);
 
         //Register listeners
-        EventManager.RegisterListener(EventManager.MessageKey.EnemyDied, deathAction);
+        EventManager.RegisterListener(MessageKey.EnemyDied, deathAction);
     }
 
     //When an enemyDied message is recieved do this
@@ -126,14 +135,16 @@ public class GameManager : MonoBehaviour {
     {
         m_Player.transform.position = playerSpawn;
         m_Player.SetActive(true);
-        EventManager.PostMessage(EventManager.MessageKey.PlayerRespawned);
+        EventManager.PostMessage(MessageKey.PlayerRespawned);
     }
 
+    //Instantiate player prefab at player spawn or reset position
     void SpawnPlayer()
     {
         if(m_Player == null)
         {
             m_Player = Instantiate(player, playerSpawn, Quaternion.identity) as GameObject;
+            entityTable.AddToTable(m_Player);
         }
         else
         {
@@ -141,11 +152,13 @@ public class GameManager : MonoBehaviour {
         }
     }
 
+    //Pull next inactive enemy from pool
     void SpawnEnemies()
     {
-        Enemy temp = Instantiate(enemy, GetSpawnPos(), Quaternion.identity) as Enemy;
-        enemies.Add(temp);
-        Debug.Log("EnemyCount: " + enemies.Count);
+        GameObject temp = m_EnemyPool.NextPooledObject(false);
+        if (!temp) return;
+        temp.GetComponent<Enemy>().Respawn();
+        temp.transform.position = GetSpawnPos();
     }
 
     Vector3 GetSpawnPos()

@@ -33,10 +33,10 @@ public class HealthBarController : MonoBehaviour
         RegisterListeners();
 
     }
-    
+
     void RegisterListeners()
     {
-        EventManager.RegisterListener(EventManager.MessageKey.EnemyDamaged, OnTakeDamage);
+        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.EnemyDamaged, OnTakeDamage);
     }
         
     void OnTakeDamage()

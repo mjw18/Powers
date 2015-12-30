@@ -34,8 +34,8 @@ public class CameraController : MonoBehaviour {
         //Necessary?
         shakeCamera = ShakeCamera;
         //Register Shake Camera, own function/ dd one if more message registers
-        EventManager.RegisterListener(EventManager.MessageKey.ChargeHit, shakeCamera);
-        EventManager.RegisterListener(EventManager.MessageKey.PlayerRespawned, OnTargetLoss);
+        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.ChargeHit, shakeCamera);
+        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.PlayerRespawned, OnTargetLoss);
 	}
 	
 	// Update is called once per frame
