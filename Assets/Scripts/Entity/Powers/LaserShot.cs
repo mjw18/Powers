@@ -29,11 +29,25 @@ public class LaserShot : MonoBehaviour {
         }
     }
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        Collider2D other = collision.collider;
+
+        if (other.gameObject != gameObject && !other.gameObject.CompareTag(Tags.player) && !other.gameObject.CompareTag(Tags.targetSelector))
+        {
+            //Resets the lifetime timer
+            m_LifeTimer.StopTimer();
+            DestroyLaserShot();
+            ExtendedEvents.EventManager.PostMessage(ExtendedEvents.MessageKey.LaserHit, collision);
+            ExtendedEvents.EventManager.PostMessage(ExtendedEvents.MessageKey.LaserHit, other.gameObject.GetInstanceID());
+            Debug.Log("LaserDestroyed!" + other);
+        }
+    }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject != gameObject && !other.gameObject.CompareTag(Tags.player) && !other.gameObject.CompareTag(Tags.targetSelector))
         {
-            Debug.Log(transform.position);
             //Resets the lifetime timer
             m_LifeTimer.StopTimer();
             DestroyLaserShot();

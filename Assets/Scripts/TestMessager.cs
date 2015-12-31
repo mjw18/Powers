@@ -14,7 +14,7 @@ public class TestMessager : MonoBehaviour {
         }
 
         Debug.Log("Registering...");
-        EventManager.RegisterListener(MessageKey.Test, testAction);
+        //EventManager.RegisterListener(MessageKey.Test, testAction);
     }
 
     void OnEnable()

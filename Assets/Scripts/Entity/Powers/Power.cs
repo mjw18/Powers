@@ -50,11 +50,6 @@ public class Power : MonoBehaviour {
 
         m_Player = this.gameObject;
 
-        foreach (var effect in powerConfig.visualEffects)
-        {
-            SetEffectPosition(effect.visualEffect, effect.placement, effect.offset);
-        }
-
         if (usageMode == PowerUsageMode.Unassigned) Debug.Log("not yet");
         else SetKey();
     }
@@ -157,14 +152,6 @@ public class Power : MonoBehaviour {
             case PowerUsageMode.Secondary:
                 keyCode = m_Player.GetComponent<PlayerController>().secondaryPowerKey;
                 break;
-        }
-    }
-
-    void Update()
-    {
-        if(Input.GetKeyDown("t"))
-        {
-            StopAllCoroutines();
         }
     }
 

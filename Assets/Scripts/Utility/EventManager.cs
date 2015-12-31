@@ -7,15 +7,22 @@ using System.Reflection;
 
 namespace ExtendedEvents
 {
+    class EventMap<T>
+    {
+        public Dictionary<MessageKey, GenericUnityEvent<T>> eventMap;
+
+        public EventMap()
+        {
+            eventMap = new Dictionary<MessageKey, GenericUnityEvent<T>>();
+        }
+    }
 
     public class EventManager : MonoBehaviour
     { 
-        private Dictionary<Type, Dictionary<MessageKey, GenericUnityEvent<Type>>> completeDictionary;
-
-        private Dictionary<MessageKey, GenericUnityEvent<System.DBNull>> eventDictionary;
-        //Consdier Using reflection to make a single argument event Log
-        //Could also use a custom pool
-        private Dictionary<MessageKey, GenericUnityEvent<int>> intEventDictionary;
+        private EventMap<DBNull> eventDictionary;
+        private EventMap<int> intEventDictionary;
+        private EventMap<Collision2D> collisionEventDictionary;
+        private EventMap<RaycastHit2D> rayHitEventDictionary;
 
         public static EventManager instance;
 
@@ -37,58 +44,31 @@ namespace ExtendedEvents
 
         void Init()
         {
-            if (completeDictionary == null)
-            {
-                completeDictionary = new Dictionary<Type, Dictionary<MessageKey, GenericUnityEvent<Type> > >();
-            }
             if (eventDictionary == null)
             {
-                eventDictionary = new Dictionary<MessageKey, GenericUnityEvent<System.DBNull>>();
+                eventDictionary = new EventMap<System.DBNull>();
             }
             if (intEventDictionary == null)
             {
-                intEventDictionary = new Dictionary<MessageKey, GenericUnityEvent<int>>();
+                intEventDictionary = new EventMap<int>();
             }
-        }
-
-        Dictionary<MessageKey, GenericUnityEvent<T>> MakeDict<T>()
-        {
-            return new Dictionary<MessageKey, GenericUnityEvent<T>>();
-        }
-
-        //Register a single argument delegate
-        public static void RegisterListener<T>(MessageKey key, UnityAction<T> callback)
-        {
-            //Get paramters of the callback method
-            System.Reflection.ParameterInfo[] p = callback.Method.GetParameters();
-            Type[] paramTypes = new Type[p.GetUpperBound(0)];
-            //Get types of the parameters
-            for (int i = 0; i <= p.GetUpperBound(0); ++i)
+            if (collisionEventDictionary == null)
             {
-                paramTypes[i] = p[i].ParameterType;
+                collisionEventDictionary = new EventMap<Collision2D>();
             }
-
-            //Is this dictionary in the complete map yet?
-            Dictionary<MessageKey, GenericUnityEvent<Type> > tempDict = null;
-            
-            if (!instance.completeDictionary.TryGetValue(paramTypes[0], out tempDict))
+            if (rayHitEventDictionary == null)
             {
-                tempDict = new Dictionary<MessageKey, GenericUnityEvent<t>>();
-                instance.completeDictionary.Add(typeof(T), tempDict);
+                rayHitEventDictionary = new EventMap<RaycastHit2D>();
             }
         }
 
         //Add a listerner under  the given Unity Event. If null, add event and listener
         public static void RegisterListener(MessageKey key, UnityAction callback)
         {
-            callback.Method.GetGenericArguments();
-            Type type = callback.Method.ReflectedType;
-            Debug.Log("this has a type : " + type);
-
             if (EventManager.instance == null) return;
             GenericUnityEvent<System.DBNull> thisEvent = null;
 
-            if (instance.eventDictionary.TryGetValue(key, out thisEvent))
+            if (instance.eventDictionary.eventMap.TryGetValue(key, out thisEvent))
             {
                 thisEvent.naEvent.AddListener(callback);
             }
@@ -96,23 +76,17 @@ namespace ExtendedEvents
             {
                 thisEvent = new GenericUnityEvent<System.DBNull>();
                 thisEvent.naEvent.AddListener(callback);
-                instance.eventDictionary.Add(key, thisEvent);
+                instance.eventDictionary.eventMap.Add(key, thisEvent);
             }
         }
 
         //Add a listerner under  the given Unity Event. If null, add event and listener
         public static void RegisterListener(MessageKey key, UnityAction<int> callback)
         {
-            System.Reflection.ParameterInfo[] type = callback.Method.GetParameters();
-            for( int i = 0; i <= type.GetUpperBound(0); ++i)
-            {
-                Debug.Log(type[i].ParameterType + "  " + i);
-            }
-
             if (EventManager.instance == null) return;
             GenericUnityEvent<int> thisEvent = null;
 
-            if (instance.intEventDictionary.TryGetValue(key, out thisEvent))
+            if (instance.intEventDictionary.eventMap.TryGetValue(key, out thisEvent))
             {
                 thisEvent.oaEvent.AddListener(callback);
             }
@@ -120,7 +94,45 @@ namespace ExtendedEvents
             {
                 thisEvent = new GenericUnityEvent<int>();
                 thisEvent.oaEvent.AddListener(callback);
-                instance.intEventDictionary.Add(key, thisEvent);
+                instance.intEventDictionary.eventMap.Add(key, thisEvent);
+            }
+        }
+
+        //Add a listerner under  the given Unity Event. If null, add event and listener
+        public static void RegisterListener(MessageKey key, UnityAction<Collision2D> callback)
+        {
+            if (EventManager.instance == null) return;
+            GenericUnityEvent<Collision2D> thisEvent = null;
+
+            if (instance.collisionEventDictionary.eventMap.TryGetValue(key, out thisEvent))
+            {
+                thisEvent.oaEvent.AddListener(callback);
+            }
+            else
+            {
+                thisEvent = new GenericUnityEvent<Collision2D>();
+                //Change to just using this in everything
+                thisEvent.oaEvent = new UnityEventWrapper<Collision2D>();
+                thisEvent.oaEvent.AddListener(callback);
+                instance.collisionEventDictionary.eventMap.Add(key, thisEvent);
+            }
+        }
+
+        //Add a listerner under  the given Unity Event. If null, add event and listener
+        public static void RegisterListener(MessageKey key, UnityAction<RaycastHit2D> callback)
+        {
+            if (EventManager.instance == null) return;
+            GenericUnityEvent<RaycastHit2D> thisEvent = null;
+
+            if (instance.rayHitEventDictionary.eventMap.TryGetValue(key, out thisEvent))
+            {
+                thisEvent.oaEvent.AddListener(callback);
+            }
+            else
+            {
+                thisEvent = new GenericUnityEvent<RaycastHit2D>();
+                thisEvent.oaEvent.AddListener(callback);
+                instance.rayHitEventDictionary.eventMap.Add(key, thisEvent);
             }
         }
 
@@ -129,9 +141,57 @@ namespace ExtendedEvents
             if (EventManager.instance == null) return;
             GenericUnityEvent<System.DBNull> thisEvent = null;
 
-            if (instance.eventDictionary.TryGetValue(key, out thisEvent))
+            if (instance.eventDictionary.eventMap.TryGetValue(key, out thisEvent))
             {
                 thisEvent.naEvent.RemoveListener(callback);
+            }
+        }
+
+        public static void RemoveListener(MessageKey key, UnityAction<int> callback)
+        {
+            if (EventManager.instance == null) return;
+            GenericUnityEvent<int> thisEvent = null;
+
+            if (instance.intEventDictionary.eventMap.TryGetValue(key, out thisEvent))
+            {
+                thisEvent.oaEvent.RemoveListener(callback);
+            }
+        }
+
+        public static void RemoveListener(MessageKey key, UnityAction<Collision2D> callback)
+        {
+            if (EventManager.instance == null) return;
+            GenericUnityEvent<Collision2D> thisEvent = null;
+
+            if (instance.collisionEventDictionary.eventMap.TryGetValue(key, out thisEvent))
+            {
+                thisEvent.oaEvent.RemoveListener(callback);
+            }
+        }
+
+        public static void RemoveListener(MessageKey key, UnityAction<RaycastHit2D> callback)
+        {
+            if (EventManager.instance == null) return;
+            GenericUnityEvent<RaycastHit2D> thisEvent = null;
+
+            if (instance.rayHitEventDictionary.eventMap.TryGetValue(key, out thisEvent))
+            {
+                thisEvent.oaEvent.RemoveListener(callback);
+            }
+        }
+
+        //Post Message to listeners using TGV and invoke 
+        public static void PostMessage(MessageKey message)
+        {
+            GenericUnityEvent<System.DBNull> thisEvent = null;
+
+            if (instance.eventDictionary.eventMap.TryGetValue(message, out thisEvent))
+            {
+                thisEvent.naEvent.Invoke();
+            }
+            else
+            {
+                Debug.Log("No listeners in na for this event: " + message);
             }
         }
 
@@ -140,7 +200,7 @@ namespace ExtendedEvents
         {
             GenericUnityEvent<int> thisEvent = null;
 
-            if (instance.intEventDictionary.TryGetValue(message, out thisEvent))
+            if (instance.intEventDictionary.eventMap.TryGetValue(message, out thisEvent))
             {
                 thisEvent.oaEvent.Invoke(arg);
             }
@@ -151,17 +211,32 @@ namespace ExtendedEvents
         }
 
         //Post Message to listeners using TGV and invoke 
-        public static void PostMessage(MessageKey message)
+        public static void PostMessage(MessageKey message, Collision2D col)
         {
-            GenericUnityEvent<System.DBNull> thisEvent = null;
+            GenericUnityEvent<Collision2D> thisEvent = null;
 
-            if (instance.eventDictionary.TryGetValue(message, out thisEvent))
+            if (instance.collisionEventDictionary.eventMap.TryGetValue(message, out thisEvent))
             {
-                thisEvent.naEvent.Invoke();
+                thisEvent.oaEvent.Invoke(col);
             }
             else
             {
-                Debug.Log("No listeners in na for this event: " + message);
+                Debug.Log("No listeners for this event: " + message);
+            }
+        }
+
+        //Post Message to listeners using TGV and invoke 
+        public static void PostMessage(MessageKey message, RaycastHit2D hit)
+        {
+            GenericUnityEvent<RaycastHit2D> thisEvent = null;
+
+            if (instance.rayHitEventDictionary.eventMap.TryGetValue(message, out thisEvent))
+            {
+                thisEvent.oaEvent.Invoke(hit);
+            }
+            else
+            {
+                Debug.Log("No listeners for this event: " + message);
             }
         }
     }
@@ -181,6 +256,7 @@ namespace ExtendedEvents
 
     public class UnityEventWrapper<T> : UnityEvent<T> { }
 
+    //This is superfluous until reflection either works or I give up
     public class GenericUnityEvent<T>
     {
         private UnityEventBase m_Event;
@@ -190,7 +266,7 @@ namespace ExtendedEvents
         public UnityEvent naEvent;
         public UnityEventWrapper<T> oaEvent;
 
-        public GenericUnityEvent(Type t)
+        public GenericUnityEvent()
         {
             //Debug.Log(thingToGetTypeFrom is System.DBNull);
             if (thingToGetTypeFrom == null)
@@ -199,13 +275,7 @@ namespace ExtendedEvents
             }
             else
             {
-                oaEvent = Activator.CreateInstance<UnityEventWrapper<T>>();
-
-                MethodInfo method = typeof(T).GetMethod("UnityEventWrapper", BindingFlags.CreateInstance);
-                method = method.MakeGenericMethod(typeof(T));
-                if (!method.IsConstructor) Debug.Log("Nope, not how that works");
-                object[] arguments;
-                oaEvent = method.Invoke(oaEvent, arguments);
+                oaEvent = new UnityEventWrapper<T>();
             }
         }
     }
