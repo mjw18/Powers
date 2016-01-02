@@ -21,9 +21,10 @@ public class LaserShot : MonoBehaviour {
         m_LifeTimer.StartTimer();
     }
 
+    //Destroy laser after given lifetime
     void Update()
     {
-        if(m_LifeTimer.CheckTimer())
+        if (m_LifeTimer.CheckTimer())
         {
             DestroyLaserShot();
         }
@@ -31,8 +32,10 @@ public class LaserShot : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        //Shorthand for collider, work to fit copy pasted code, CHANGE
         Collider2D other = collision.collider;
 
+        //IF not player, target selector, or laser object
         if (other.gameObject != gameObject && !other.gameObject.CompareTag(Tags.player) && !other.gameObject.CompareTag(Tags.targetSelector))
         {
             //Resets the lifetime timer
@@ -44,7 +47,7 @@ public class LaserShot : MonoBehaviour {
         }
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTreiggerEnter2D(Collider2D other)
     {
         if (other.gameObject != gameObject && !other.gameObject.CompareTag(Tags.player) && !other.gameObject.CompareTag(Tags.targetSelector))
         {
@@ -56,6 +59,7 @@ public class LaserShot : MonoBehaviour {
         }
     }
 
+    //Deactivate laser object, send messages (?)
     public void DestroyLaserShot()
     {
         gameObject.SetActive(false);

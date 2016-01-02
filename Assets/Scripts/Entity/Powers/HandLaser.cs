@@ -8,9 +8,6 @@ public class HandLaser : Power {
 
     public Vector3 shootDirection = Vector3.right;
 
-    //Move to laser shot class?
-    private RaycastHit2D m_Hit;
-
     void Awake()
     {
         base.Init();
@@ -23,33 +20,33 @@ public class HandLaser : Power {
 
     public override void Execute()
     {
-        //Default charge direction is forward
-        Vector3 rayToTarget = shootDirection * player.facing;
-
-        //Get ray to chosen target, change to use DamageType
-        if (targetSelector.targets.Count > 0)
-        {
-            //Store target in power
-            target = targetSelector.targets[0].GetComponent<Transform>();
-
-            //Get ray from player to taget
-            RaycastHit2D hit = Physics2D.Raycast(m_ShootPosition.position, 
-                                                 target.position - m_Player.transform.position, 
-                                                 powerConfig.range);
-
-            rayToTarget = hit.point - (Vector2)m_ShootPosition.position;
-            m_Hit = hit;
-        }
+        Vector3 rayToTarget = GetShootDirection();
 
         GameObject laser = GameManager.instance.m_LaserShotPool.NextPooledObject(false);
 
         laser.transform.position = m_ShootPosition.position;
-
+        //GameObject.Find("Targeted").GetComponent<Transform>().position = m_ShootPosition.position;
         laser.transform.LookAt(m_Player.transform.position + rayToTarget);
         laser.GetComponent<ShotMover>().shotDirection = Vector3.Normalize(rayToTarget);
         laser.SetActive(true);
-        Debug.DrawLine(m_ShootPosition.position, m_Hit.point, Color.white);
         base.Execute();
+    }
+
+    Vector3 GetShootDirection()
+    {
+        //Default charge direction is forward
+        Vector3 rayToTarget = Vector3.right * player.facing;
+
+        Debug.Log((m_Hit.point.y - m_ShootPosition.position.y)/(m_Hit.point.x - m_ShootPosition.position.x));
+
+        //Get ray to chosen target, change to use DamageType
+        if (targetSelector.targets.Count == 0) return m_Hit.point - (Vector2)m_ShootPosition.position;
+
+        //Store target in power, why, I don't know
+        target = targetSelector.targets[0].GetComponent<Transform>();
+
+        return m_Hit.point - (Vector2)m_ShootPosition.position;
+
     }
 
     public void OnLaserHit(int hitID)

@@ -16,7 +16,7 @@ public class Power : MonoBehaviour {
     public PowerConfig powerConfig;
     public PowerUsageMode usageMode = PowerUsageMode.Unassigned;
 
-    private bool m_UsingPower = false;
+    protected bool m_UsingPower = false;
     public bool canUsePower
     {
         get { return !m_UsingPower; }
@@ -25,6 +25,7 @@ public class Power : MonoBehaviour {
     public GameObject m_Player;
     public Transform target;
     protected TargetSelector targetSelector;
+    protected RaycastHit2D m_Hit;
 
     protected Player player;
     protected Rigidbody2D playerRigidbody;
@@ -45,6 +46,7 @@ public class Power : MonoBehaviour {
 
         GameObject tempSelector = GameObject.Find("TargetSelector");
         if (tempSelector) targetSelector = tempSelector.GetComponent<TargetSelector>();
+        targetSelector.maxRange = powerConfig.range;
 
         refRegulator = GameManager.instance.globalRegulator;
 
@@ -97,10 +99,9 @@ public class Power : MonoBehaviour {
         //Negative input value sets to singlee target acquisition
         targetSelector.ResizeSelector(powerConfig.effectRadius);
         targetSelector.gameObject.SetActive(true);
-
         if(Input.GetMouseButtonDown(0))
         {
-            targetSelector.SelectTargets();
+            targetSelector.SelectTargets(out m_Hit);
         }
 
         targetSelector.gameObject.SetActive(false);
@@ -118,15 +119,15 @@ public class Power : MonoBehaviour {
 
     IEnumerator AcquireTarget()
     {
+        targetSelector.origin = m_Player.transform.position;
         targetSelector.gameObject.SetActive(true);
-        Debug.Log("Target acquisition phase");
 
         while (!Input.GetMouseButtonDown(0))
         {
+            targetSelector.origin = player.shootPosition.position;
             //If user presses key again, exit. Switch later to hold and release
             if (Input.GetKeyDown(keyCode))
             {
-                Debug.Log("Breaking");
                 targetSelector.gameObject.SetActive(false);
                 yield break;
             }
@@ -135,7 +136,7 @@ public class Power : MonoBehaviour {
         }
 
         //Mouse has been pressed and targets have been added
-        targetSelector.SelectTargets();
+        targetSelector.SelectTargets(out m_Hit);
         targetSelector.gameObject.SetActive(false);
         
         //Write new yield command

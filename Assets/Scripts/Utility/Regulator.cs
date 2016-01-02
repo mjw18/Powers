@@ -8,7 +8,7 @@ public class Regulator : MonoBehaviour {
     private float m_startTime;
     private float m_timer = 0f;
     private float m_lastTime = 0f;
-    private bool m_timing = false;
+    public bool m_timing = false;
 
     //DeltaTime calculated in real time
     private float deltaTime = 0.0f;
@@ -71,7 +71,7 @@ public class Regulator : MonoBehaviour {
     //Stops timer and resets time value
     public void StopTimer()
     {
-        m_timer = 0;
+        m_timer = 0f;
         m_timing = false;
     }
 
@@ -107,5 +107,10 @@ public class Regulator : MonoBehaviour {
 
         if (Time.timeScale != 1f) Time.timeScale = 1f;
         yield return null;
+    }
+
+    void OnDisable()
+    {
+        StopTimer();
     }
 }
