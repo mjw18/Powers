@@ -29,7 +29,7 @@ public class Enemy : MonoBehaviour {
         StartCoroutine(MoveHealthBar(damage));
 
         refData.health -= damage;
-        EventManager.PostMessage(MessageKey.EnemyDamaged);
+        //EventManager.PostMessage(MessageKey.EnemyDamaged);
 
         if (refData.health <= float.Epsilon)
         {
@@ -44,7 +44,7 @@ public class Enemy : MonoBehaviour {
     //Deactivate enemy
     public void Kill()
     {
-        EventManager.PostMessage(MessageKey.EnemyDied);
+        EventManager.PostMessage<EnemyDiedMessage>(new EnemyDiedMessage());
         Instantiate(DeathParticles, transform.position, Quaternion.identity);
         gameObject.SetActive(false);
     }

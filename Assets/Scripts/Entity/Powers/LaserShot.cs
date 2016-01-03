@@ -36,28 +36,13 @@ public class LaserShot : MonoBehaviour {
         //Shorthand for collider, work to fit copy pasted code, CHANGE
         Collider2D other = collision.collider;
 
-        CollisionMessage colMes = new CollisionMessage(collision);
-        IDMessage idMes = new IDMessage(other.gameObject.GetInstanceID());
         //IF not player, target selector, or laser object
         if (other.gameObject != gameObject && !other.gameObject.CompareTag(Tags.player) && !other.gameObject.CompareTag(Tags.targetSelector))
         {
             //Resets the lifetime timer
             m_LifeTimer.StopTimer();
             DestroyLaserShot();
-            ExtendedEvents.EventManager.PostMessage<CollisionMessage>(colMes);
-            ExtendedEvents.EventManager.PostMessage<IDMessage>(idMes);
-            Debug.Log("LaserDestroyed!" + other);
-        }
-    }
-
-    void OnTreiggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject != gameObject && !other.gameObject.CompareTag(Tags.player) && !other.gameObject.CompareTag(Tags.targetSelector))
-        {
-            //Resets the lifetime timer
-            m_LifeTimer.StopTimer();
-            DestroyLaserShot();
-            ExtendedEvents.EventManager.PostMessage(ExtendedEvents.MessageKey.LaserHit, other.gameObject.GetInstanceID());
+            EventManager.PostMessage<LaserHitMessage>(new LaserHitMessage(other.gameObject.GetInstanceID(), collision));
             Debug.Log("LaserDestroyed!" + other);
         }
     }

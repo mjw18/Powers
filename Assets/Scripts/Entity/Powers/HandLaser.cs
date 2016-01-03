@@ -15,8 +15,8 @@ public class HandLaser : Power {
         m_ShootPosition = player.shootPosition;
 
         //Register on hit event
-        UnityAction<IDMessage> onLaserHitAction = OnLaserHit;
-        ExtendedEvents.EventManager.NewRegisterListener<IDMessage>(onLaserHitAction);
+        UnityAction<LaserHitMessage> onLaserHitAction = OnLaserHit;
+        EventManager.RegisterListener<LaserHitMessage>(onLaserHitAction, MessageKey.LaserHit);
     }
 
     public override void Execute()
@@ -50,9 +50,9 @@ public class HandLaser : Power {
 
     }
 
-    public void OnLaserHit(IDMessage hitID)
+    public void OnLaserHit(LaserHitMessage hit)
     {
-        GameObject hitObj = GameManager.instance.entityTable.GetEntityFromID(hitID.ID);
+        GameObject hitObj = GameManager.instance.entityTable.GetEntityFromID(hit.ID);
 
         if(!hitObj)
         {

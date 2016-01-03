@@ -118,7 +118,7 @@ public class Player : MonoBehaviour
 
     public void OnPlayerDied()
     {
-        EventManager.PostMessage(MessageKey.PlayerDied);
+        //EventManager.PostMessage(MessageKey.PlayerDied);
         gameObject.SetActive(false);
     }
 }

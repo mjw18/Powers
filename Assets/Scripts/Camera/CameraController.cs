@@ -24,22 +24,23 @@ public class CameraController : MonoBehaviour {
     {
         m_Camera = GetComponent<Camera>();
         m_CameraTransform = m_Camera.transform;
-        target = GameObject.FindGameObjectWithTag("Player").transform;
+        target = GameObject.FindGameObjectWithTag(Tags.player).transform;
         if(!target)
         {
             Debug.Log("Camera target not set");
         }
 
         m_DoFollow = true;
+
         //Necessary?
-        UnityAction<ShakeCameraMessage> shakeCamera = ShakeCamera;
+        UnityAction<ChargeHitMessage> shakeCamera = ShakeCamera;
 
         //Make a generic "move to specific target" message
         UnityAction<PlayerRespawnedMessage> findPlayer = OnTargetLoss;
 
         //Register Shake Camera, own function/ dd one if more message registers
-        ExtendedEvents.EventManager.RegisterListener<ShakeCameraMessage>(shakeCamera, MessageKey.ShakeCamera);
-        ExtendedEvents.EventManager.RegisterListener<PlayerRespawnedMessage>(findPlayer, MessageKey.PlayerRespawned);
+        EventManager.RegisterListener<ChargeHitMessage>(shakeCamera, MessageKey.ShakeCamera);
+        EventManager.RegisterListener<PlayerRespawnedMessage>(findPlayer, MessageKey.PlayerRespawned);
 	}
 	
 	// Update is called once per frame
@@ -70,12 +71,13 @@ public class CameraController : MonoBehaviour {
         }
 
         m_CameraTransform.position = startPos;
+        Debug.Log("ShakeComplete");
         yield return null;
     }
 
-    void ShakeCamera(ShakeCameraMessage shakeMessage)
+    void ShakeCamera(ChargeHitMessage shakeMessage)
     {
-        StartCoroutine(ShakeCamera(shakeMessage.shakeTime));
+        StartCoroutine(ShakeCamera(shakeMessage.cameraShakeTime));
     }
 
     //This is terrible, use easing functions

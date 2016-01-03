@@ -7,6 +7,8 @@ public class Charge : Power {
     public float chargeForce = 1f;
     public float speed = 5f;
 
+    private Transform m_CastPosition;
+
     private bool m_Charging = false;
 
     public Easing.VectorEasingFunction easeFunction = Easing.VectorEaseIn;
@@ -15,6 +17,7 @@ public class Charge : Power {
     void Awake()
     {
         base.Init();
+        m_CastPosition = player.shootPosition;
     }
 
     public override void Execute()
@@ -24,53 +27,39 @@ public class Charge : Power {
         m_Charging = true;
 
         //Default charge direction is forward
-        Vector3 rayToTarget = Vector3.right * player.facing;
+        Vector3 rayToTarget = GetChargeDirection();
 
-        //Get ray to chosen target
-        if (targetSelector.targets.Count > 0)
-        {
-            Debug.Log(targetSelector.targets[0]);
-            rayToTarget = targetSelector.targets[0].transform.position - m_Player.transform.position;
-        }
         GameObject hitObj = null;
         //Change to Crcle Cast to avoid glitches where player warps through walls?
         RaycastHit2D hit = Physics2D.Raycast(player.shootPosition.position, rayToTarget, powerConfig.range);
-        if (hit) hitObj = hit.collider.gameObject;
 
-        //Strings
+        if (hit) hitObj = hit.collider.gameObject;
+        //If the casted object is null (no object hit) then return
+        if (hitObj == null) return;
+
         //If there is an object between the player and target
-        if(!hitObj)
-        {
-            Debug.Log(rayToTarget);
-            StartCoroutine(MoveToTarget(m_Player, Vector3.Normalize(rayToTarget) * powerConfig.range));
-        }
-        else if (!hitObj.CompareTag("Enemy"))
+        if (!hitObj.CompareTag(Tags.enemy))
         {
             StartCoroutine(MoveToTarget(m_Player, hit.point, hitObj));
-            //Move to Visual Effects?
-            EventManager.PostMessage(MessageKey.ShakeCamera);
         }
         else
         {
             StartCoroutine(MoveToTarget(m_Player, hit.point, hitObj));
         }
+    }
 
-        /* RaycastHit2D[] hits = Physics2D.CircleCastAll(m_Player.transform.position, 3f, Vector2.right * m_Player.facing, ChargeData.chargeAttackDistance);
+    Vector3 GetChargeDirection()
+    {
+        //Default charge direction is forward
+        Vector3 rayToTarget = Vector3.right * player.facing;
 
-         foreach (RaycastHit2D hit in hits)
-         {
-             Debug.Log("Entered for each");
-             if (hit.collider.tag == "Enemy" && !hasHit)
-             {
-                 Debug.Log("Charge Attack Enemy at " + hit.point);
-                 Debug.Log(hit.normal);
+        //Get ray to chosen target, change to use DamageType
+        if (targetSelector.targets.Count == 0) return Vector3.zero;
 
-              //   StartCoroutine(SmoothMove(hit));
+        //Store target in power, why, I don't know
+        target = targetSelector.targets[0].GetComponent<Transform>();
 
-                 hasHit = true;
-                 EventManager.PostMessage(EventManager.MessageKey.ChargeHit);
-             }
-         }*/
+        return target.position - m_CastPosition.position;
     }
 
     void PostCharge(GameObject hitObj, Vector3 rayToTarget)
@@ -78,16 +67,17 @@ public class Charge : Power {
 
         playerRigidbody.velocity = Vector2.zero;
 
-        if(hitObj && hitObj.CompareTag("Enemy"))
+        if(hitObj.CompareTag(Tags.enemy))
         {
             hitObj.GetComponent<Enemy>().ApplyDamage(powerConfig.damage);
             hitObj.GetComponent<Rigidbody2D>().AddForce(Vector3.Normalize(rayToTarget) * chargeForce, ForceMode2D.Impulse);
         }
-
-        EventManager.PostMessage(MessageKey.ChargeHit);
+        else
+        {
+            Debug.Log("Hit a wall?");
+        }
     }
 
-    //It would be great to not hae to keep writing this over and over (look into retunr values/out params)
     IEnumerator MoveToTarget(GameObject a, Vector3 target, GameObject hitObj = null)
     {
         float t = 0f;
@@ -100,15 +90,14 @@ public class Charge : Power {
         {
             playerRigidbody.MovePosition(Easing.InterpolateVector(tempPos, target, t, easeType, easeFunction));
 
-            //m_Player.transform.position = Easing.InterpolateVector(tempPos, target, t, easeType, easeFunction);
-            //Real DeltaTime?
             t += rate * Time.deltaTime;
             yield return new WaitForFixedUpdate();
         }
         //Post has hit Message here?
         PostCharge(hitObj, target - tempPos);
-        
-        yield return new WaitForSeconds(1f);
+        EventManager.PostMessage<ChargeHitMessage>(new ChargeHitMessage(1f));
+
+        yield return new WaitForSeconds(2f);
     }
 
 }

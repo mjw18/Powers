@@ -36,10 +36,11 @@ public class HealthBarController : MonoBehaviour
 
     void RegisterListeners()
     {
-        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.EnemyDamaged, OnTakeDamage);
+        UnityEngine.Events.UnityAction<ExtendedEvents.EnemyDamagedMessage> onTakeDamage = OnTakeDamage;
+        ExtendedEvents.EventManager.RegisterListener<ExtendedEvents.EnemyDamagedMessage>(onTakeDamage, ExtendedEvents.MessageKey.EnemyDamaged);
     }
         
-    void OnTakeDamage()
+    void OnTakeDamage(ExtendedEvents.EnemyDamagedMessage damageMessage)
     {
         StartCoroutine(ScaleHealth());
     }
