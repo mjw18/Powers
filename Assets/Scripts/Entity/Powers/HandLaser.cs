@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
+using ExtendedEvents;
 
 public class HandLaser : Power {
 
@@ -14,8 +15,8 @@ public class HandLaser : Power {
         m_ShootPosition = player.shootPosition;
 
         //Register on hit event
-        UnityAction<int> onLaserHitAction = OnLaserHit;
-        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.LaserHit, onLaserHitAction);
+        UnityAction<IDMessage> onLaserHitAction = OnLaserHit;
+        ExtendedEvents.EventManager.NewRegisterListener<IDMessage>(onLaserHitAction);
     }
 
     public override void Execute()
@@ -49,9 +50,9 @@ public class HandLaser : Power {
 
     }
 
-    public void OnLaserHit(int hitID)
+    public void OnLaserHit(IDMessage hitID)
     {
-        GameObject hitObj = GameManager.instance.entityTable.GetEntityFromID(hitID);
+        GameObject hitObj = GameManager.instance.entityTable.GetEntityFromID(hitID.ID);
 
         if(!hitObj)
         {
@@ -71,8 +72,5 @@ public class HandLaser : Power {
         {
             hitObj.GetComponent<Enemy>().ApplyDamage(powerConfig.damage);
         }
-
-        //Fire Play particles event?
-        //ExtendedEvents.EventManager.PostMessage(ExtendedEvents.MessageKey.LaserHit, m_Hit);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
+using ExtendedEvents;
 
 public class CameraController : MonoBehaviour {
 
@@ -11,7 +12,6 @@ public class CameraController : MonoBehaviour {
     public Easing.VectorEasingFunction easeFunction = Easing.VectorEaseInOut;
     public EasingType e = EasingType.Sin;
 
-    private UnityAction shakeCamera;
     private Camera m_Camera;
 
     private Transform m_CameraTransform;
@@ -32,10 +32,14 @@ public class CameraController : MonoBehaviour {
 
         m_DoFollow = true;
         //Necessary?
-        shakeCamera = ShakeCamera;
+        UnityAction<ShakeCameraMessage> shakeCamera = ShakeCamera;
+
+        //Make a generic "move to specific target" message
+        UnityAction<PlayerRespawnedMessage> findPlayer = OnTargetLoss;
+
         //Register Shake Camera, own function/ dd one if more message registers
-        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.ChargeHit, shakeCamera);
-        ExtendedEvents.EventManager.RegisterListener(ExtendedEvents.MessageKey.PlayerRespawned, OnTargetLoss);
+        ExtendedEvents.EventManager.RegisterListener<ShakeCameraMessage>(shakeCamera, MessageKey.ShakeCamera);
+        ExtendedEvents.EventManager.RegisterListener<PlayerRespawnedMessage>(findPlayer, MessageKey.PlayerRespawned);
 	}
 	
 	// Update is called once per frame
@@ -69,9 +73,9 @@ public class CameraController : MonoBehaviour {
         yield return null;
     }
 
-    void ShakeCamera()
+    void ShakeCamera(ShakeCameraMessage shakeMessage)
     {
-        StartCoroutine(ShakeCamera(shakeTime));
+        StartCoroutine(ShakeCamera(shakeMessage.shakeTime));
     }
 
     //This is terrible, use easing functions
@@ -82,7 +86,7 @@ public class CameraController : MonoBehaviour {
     }
 
     //use return coroutine here (for completion bool? for I dont know what)
-    void OnTargetLoss()
+    void OnTargetLoss(PlayerRespawnedMessage respawn)
     {
         m_DoFollow = false;
         Time.timeScale = 0.0f;
