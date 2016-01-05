@@ -29,7 +29,8 @@ public class Power : MonoBehaviour {
 
     protected Player player;
     protected Rigidbody2D playerRigidbody;
-    protected Transform playerTransform;
+    protected Transform m_PlayerTransform;
+    protected Transform m_ShootPosition;
 
     //Time control
     private Regulator refRegulator;
@@ -41,10 +42,12 @@ public class Power : MonoBehaviour {
     protected void Init()
     {
         player = GetComponent<Player>();
-        playerTransform = player.transform;
         playerRigidbody = player.GetComponent<Rigidbody2D>();
+        m_PlayerTransform = player.transform;
+        m_ShootPosition = player.shootPosition;
 
-        GameObject tempSelector = GameObject.Find("TargetSelector");
+        //Change this, init in GameController? specific to each power?
+        GameObject tempSelector = GameObject.Find(Tags.targetSelector);
         if (tempSelector) targetSelector = tempSelector.GetComponent<TargetSelector>();
         targetSelector.maxRange = powerConfig.range;
 
@@ -62,13 +65,13 @@ public class Power : MonoBehaviour {
         switch (effectPlacement)
         {
             case VisualEffectPlacement.CenteredOnPlayer:
-                effect.SetPosition(playerTransform.position);
+                effect.SetPosition(m_PlayerTransform.position);
                 break;
             case VisualEffectPlacement.CenteredAtTarget:
                 effect.SetPosition(target.position);
                 break;
             case VisualEffectPlacement.OffsetPlayer:
-                effect.SetPosition(playerTransform.position + offset);
+                effect.SetPosition(m_PlayerTransform.position + offset);
                 break;
             case VisualEffectPlacement.OffsetTarget:
                 effect.SetPosition(target.position + offset);
@@ -99,6 +102,8 @@ public class Power : MonoBehaviour {
         //Negative input value sets to singlee target acquisition
         targetSelector.ResizeSelector(powerConfig.effectRadius);
         targetSelector.gameObject.SetActive(true);
+
+        //On mouse click, select targets
         if(Input.GetMouseButtonDown(0))
         {
             targetSelector.SelectTargets(out m_Hit);
@@ -115,6 +120,8 @@ public class Power : MonoBehaviour {
         yield return StartCoroutine( AcquireTarget() );
         yield return StartCoroutine( refRegulator.ResetTimeScale(speedTimeDuration, Easing.EaseOut, timeEaseType));
         Execute();
+
+        m_UsingPower = false;
     }
 
     IEnumerator AcquireTarget()
@@ -143,35 +150,36 @@ public class Power : MonoBehaviour {
         yield return new WaitForSeconds(0.2f);
     }
 
+    //TODO : Establish keybindings in powerManager
     public void SetKey()
     {
         switch(usageMode)
         {
             case PowerUsageMode.Primary:
-                keyCode = m_Player.GetComponent<PlayerController>().primaryPowerKey;
+                //keyCode = m_Player.GetComponent<PlayerController>().primaryPowerKey;
                 break;
             case PowerUsageMode.Secondary:
-                keyCode = m_Player.GetComponent<PlayerController>().secondaryPowerKey;
+                //keyCode = m_Player.GetComponent<PlayerController>().secondaryPowerKey;
                 break;
         }
     }
 
+    //Have a switch here for usage mode exeute?
     virtual public void Execute()
     {
         foreach( var effect in powerConfig.visualEffects )
         {
             effect.visualEffect.PlayEffect();
         }
-
-        m_UsingPower = false;
-
     }
 
+    //Which Execute function of the power should be used
     public enum PowerUsageMode
     {
         Primary,
         Secondary,
         Defensive,
+        Movement,
         Passive,
         Unassigned
     }

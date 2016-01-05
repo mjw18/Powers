@@ -5,9 +5,10 @@ using ExtendedEvents;
 
 public class HandLaser : Power {
 
-    private Transform m_ShootPosition;
-
     public Vector3 shootDirection = Vector3.right;
+
+    //Object refernce for pool lookup
+    public GameObject Laser;
 
     void Awake()
     {
@@ -16,19 +17,26 @@ public class HandLaser : Power {
 
         //Register on hit event
         UnityAction<LaserHitMessage> onLaserHitAction = OnLaserHit;
-        EventManager.RegisterListener<LaserHitMessage>(onLaserHitAction, MessageKey.LaserHit);
+        EventManager.RegisterListener<LaserHitMessage>(onLaserHitAction);
     }
 
     public override void Execute()
     {
         Vector3 rayToTarget = GetShootDirection();
 
-        GameObject laser = GameManager.instance.m_LaserShotPool.NextPooledObject(false);
+        //Get next laser
+        GameObject laser = GameManager.instance.GetObjectPool(Laser).NextPooledObject(false);
 
+        //Place laser at shootposition
         laser.transform.position = m_ShootPosition.position;
-        //GameObject.Find("Targeted").GetComponent<Transform>().position = m_ShootPosition.position;
+
+        //Rotate laser in travel direction
         laser.transform.LookAt(m_Player.transform.position + rayToTarget);
+
+        //Make laser move in correct direction
         laser.GetComponent<ShotMover>().shotDirection = Vector3.Normalize(rayToTarget);
+
+        //Activate laser
         laser.SetActive(true);
         base.Execute();
     }
@@ -47,11 +55,11 @@ public class HandLaser : Power {
         target = targetSelector.targets[0].GetComponent<Transform>();
 
         return m_Hit.point - (Vector2)m_ShootPosition.position;
-
     }
 
     public void OnLaserHit(LaserHitMessage hit)
     {
+        //Get gameobject by ID
         GameObject hitObj = GameManager.instance.entityTable.GetEntityFromID(hit.ID);
 
         if(!hitObj)

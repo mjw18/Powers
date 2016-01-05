@@ -95,7 +95,7 @@ public class Charge : Power {
         }
         //Post has hit Message here?
         PostCharge(hitObj, target - tempPos);
-        EventManager.PostMessage<ChargeHitMessage>(new ChargeHitMessage(1f));
+        EventManager.PostMessage<ChargeHitMessage>(new ChargeHitMessage(0.5f));
 
         yield return new WaitForSeconds(2f);
     }

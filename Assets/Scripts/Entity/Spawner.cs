@@ -3,6 +3,8 @@ using System.Collections;
 using ExtendedEvents;
 using UnityEngine.Events;
 
+//Spawns given game object at its transform position. Need to regulate when it initializes
+
 public class Spawner : MonoBehaviour
 {
     public GameObject EntityToSpawn;
@@ -11,7 +13,7 @@ public class Spawner : MonoBehaviour
     private ObjectPool m_ObjPoolRef;
 
     //Use start to make sure event manager is set up
-    void Awake()
+    void Start()
     {
         //Register listener to remotely init pool
         UnityAction<InitSpawnersMessage> spawnMessage = Init;
@@ -21,7 +23,6 @@ public class Spawner : MonoBehaviour
     //Setup callbback to remotely int pool
     public void Init(InitSpawnersMessage initMessage)
     {
-        Debug.Log("Initializing " + m_ObjPoolRef);
         if (m_ObjPoolRef) return;
 
         m_ObjPoolRef = GameManager.instance.GetObjectPool(EntityToSpawn);

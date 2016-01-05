@@ -2,13 +2,8 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class PlayerController : MonoBehaviour {
-
-    public KeyCode primaryPowerKey = KeyCode.E;
-    public KeyCode secondaryPowerKey = KeyCode.R;
-    public Power primaryPower;
-    public Power secondaryPower; 
-
+public class PlayerController : MonoBehaviour
+{ 
     public GameObject particles;
     public ParticleSystem activeParticles;
     private Player m_Player;
@@ -21,6 +16,7 @@ public class PlayerController : MonoBehaviour {
     private Regulator m_LaserRegulator;
     private Transform m_ShootPosition;
     private SpriteRenderer m_SpriteRenderer;
+    private PowerManager m_PowerManager;
 
 	void Awake ()
     {
@@ -33,14 +29,7 @@ public class PlayerController : MonoBehaviour {
         m_ShootPosition = GameObject.Find("ShootPosition").transform;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
 
-        //This obviously should change to include other powers/UI
-        primaryPower = GetComponent<HandLaser>();
-        primaryPower.usageMode = Power.PowerUsageMode.Primary;
-        secondaryPower = GetComponent<Charge>();
-        secondaryPower.usageMode = Power.PowerUsageMode.Secondary;
-
-        //primaryPower.SetKey();
-        //secondaryPower.SetKey();
+        m_PowerManager = GetComponent<PowerManager>();
 
         //Fuck using strings though
         chargeTimeText = GameObject.Find("EnergyText").GetComponent<Text>();
@@ -64,18 +53,18 @@ public class PlayerController : MonoBehaviour {
         
         //Doesn't check for power in use soon enough
         //Add null check on power in case one is not used
-        if (Input.GetKeyDown(primaryPowerKey))
+        if (Input.GetKeyDown(m_PowerManager.primaryPowerKey))
         {
-            if (m_Player.UseEnergy(primaryPower.powerConfig.energyCost) && primaryPower.canUsePower)
+            if (m_Player.UseEnergy(m_PowerManager.primaryPower.powerConfig.energyCost) && m_PowerManager.primaryPower.canUsePower)
             {
-                if (primaryPower) StartCoroutine(primaryPower.UsePrimaryPower());
+                if (m_PowerManager.primaryPower) StartCoroutine(m_PowerManager.primaryPower.UsePrimaryPower());
             }
         }
-        else if (Input.GetKeyDown(secondaryPowerKey))
+        else if (Input.GetKeyDown(m_PowerManager.secondaryPowerKey))
         {
-            if (m_Player.UseEnergy(secondaryPower.powerConfig.energyCost) && secondaryPower.canUsePower)
+            if (m_Player.UseEnergy(m_PowerManager.secondaryPower.powerConfig.energyCost) && m_PowerManager.secondaryPower.canUsePower)
             {
-                if (secondaryPower) StartCoroutine(secondaryPower.UsePrimaryPower());
+                if (m_PowerManager.secondaryPower) StartCoroutine(m_PowerManager.secondaryPower.UsePrimaryPower());
             }
         }
     }

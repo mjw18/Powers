@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour {
         Init();
 
         InitLevel();
-	}
+    }
 
     void OnDestroy()
     {
@@ -95,16 +95,34 @@ public class GameManager : MonoBehaviour {
         //Must init manually to ensure that entity hash inits after
         m_EnemyPool.InitPool();
         //Register pool in lookup table for spawner
-        objectPoolLookup.Add(m_EnemyPool.pooledObject, m_EnemyPool);
+        //objectPoolLookup.Add(m_EnemyPool.pooledObject, m_EnemyPool);
 
         m_LaserShotPool = GameObject.Find("LaserShotPool").GetComponent<ObjectPool>();
         m_LaserShotPool.InitPool();
-        objectPoolLookup.Add(m_LaserShotPool.pooledObject, m_LaserShotPool);
+        //objectPoolLookup.Add(m_LaserShotPool.pooledObject, m_LaserShotPool);
+
+        InitPools();
         //Make this its own GameObject? Is that redundant?
         //Dont want to keep on GameManager since GM doesnt destroy on load (This might be 
         //what i want to happen
         entityTable = new EntityHashTable();
         entityTable.Init();
+    }
+
+    void InitPools()
+    {
+        GameObject[] objectPoolArray = GameObject.FindGameObjectsWithTag(Tags.objectPool);
+        
+        //Add each pool to poollookup with gameobject as key
+        foreach(var go in objectPoolArray)
+        {
+            ObjectPool temp = go.GetComponent<ObjectPool>();
+            //Initialize pool
+            temp.InitPool();
+
+            //Add pool to dictionary
+            objectPoolLookup.Add(temp.pooledObject, temp);
+        }
     }
 
     //Spawn Enemies and Player at predifined spawn points. Use Scriptable object for level config here?
@@ -114,13 +132,13 @@ public class GameManager : MonoBehaviour {
         EventManager.PostMessage<InitSpawnersMessage>(new InitSpawnersMessage());
         
         SpawnPlayer();
-        //SpawnEnemies();
 
-        GameObject[] spawners = GameObject.FindGameObjectsWithTag("Spawner");
+        //Grab spawners manually. If message works, get rid of
+        GameObject[] spawners = GameObject.FindGameObjectsWithTag(Tags.spawner);
 
         foreach(var spaw in spawners)
         {
-            //Manual init. FIX THIS
+            //Manual init. This will do until init sequence can be better controlled
             spaw.GetComponent<Spawner>().Init(new InitSpawnersMessage());
 
             //Spawn object and store reference

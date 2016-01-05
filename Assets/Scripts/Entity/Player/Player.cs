@@ -16,8 +16,6 @@ public class Player : MonoBehaviour
     public float energyRechargeRate = 3f;
     public float energy;
 
-    public PlayerStateMachine m_StateMachine;
-
     //Ground checking, move to separate script to attach to other entities
     private bool m_grounded = false;
     public float groundCheckRadius = 0.1f;
@@ -38,8 +36,6 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Awake ()
     {
-        // m_StateMachine = GetComponent<PlayerStateMachine>();
-        //m_StateMachine.Init();
 
         shootPosition = GameObject.Find("ShootPosition").GetComponent<Transform>();
         m_GroundCheck = GameObject.Find("GroundCheck").GetComponent<Transform>();
@@ -81,6 +77,7 @@ public class Player : MonoBehaviour
 
     bool CheckGround()
     {
+        //Circle cast at ground position
         Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, groundCheckRadius, whatIsGround);
 
         for (int i = 0; i < colliders.Length; i++)

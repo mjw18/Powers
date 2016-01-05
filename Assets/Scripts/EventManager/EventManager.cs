@@ -45,7 +45,6 @@ namespace ExtendedEvents
         public static void RegisterListener<T>(UnityAction<T> callback) where T : MessageInfo
         {
             if (EventManager.instance == null) return;
-
             UnityAction<MessageInfo> intern = (e) => callback.Invoke((T)e);
             UnityEventWrapper<MessageInfo> tempEvent = null;
 
@@ -226,6 +225,7 @@ namespace ExtendedEvents
         }
     }
 
+    //Overrides Generic UnityEvent
     public class UnityEventWrapper<T> : UnityEvent<T> { }
 
     public enum MessageKey

@@ -45,10 +45,13 @@ public class TargetSelector : MonoBehaviour {
 
 	void Update ()
     {
+        //Have to intialize htiPosition. Filled later with rayCast result
         Vector3 hitPosition = Vector3.forward;
 
+        //Where the mouse is on given frame
         endPosition = m_CameraController.GetMousePosition();
-        //origin = Vector3.right;
+        
+        //Raycast towards mouse, get intersect
         int j = Physics2D.RaycastNonAlloc(origin, endPosition - (Vector3)origin, targetRayHitAlloc, maxRange);
         for(int i = 0; i < j; i++ )
         {
@@ -60,16 +63,19 @@ public class TargetSelector : MonoBehaviour {
             }
         }
 
+        //raycast didn't hit. Draw selector at mouse position
         if (hitPosition == Vector3.forward)
         {
             m_Transform.position = Vector3.ClampMagnitude(endPosition - (Vector3)origin, maxRange) + (Vector3)origin;
         }
         else
         {
+            //Raycast hit, draw selector at closest point (hit or mouse)
             m_Transform.position = Vector3.SqrMagnitude((Vector3)origin - hitPosition) < Vector3.SqrMagnitude((Vector3)origin - endPosition) ? 
                                    hitPosition : Vector3.ClampMagnitude(endPosition - (Vector3)origin, maxRange) + (Vector3)origin;
         }
-
+        
+        //Set the linerenderer's bounds
         SetLineBounds();
 	}
 
@@ -90,12 +96,14 @@ public class TargetSelector : MonoBehaviour {
     {
         hit = new RaycastHit2D();
 
+        //Clear target list
         if (targets.Count > 0) targets.Clear();
 
+        //Circle cast at target position
         Collider2D[] cols = Physics2D.OverlapCircleAll(m_Transform.position, radius);
         foreach (Collider2D col in cols)
         {
-            //Fix this, I hate strings. Use a layermask in overlap
+            //Cast against targetable objects
             if((col.CompareTag(Tags.enemy) || col.CompareTag(Tags.interactable) ) && col.gameObject != gameObject)
             {
                 targets.Add(col.gameObject);
