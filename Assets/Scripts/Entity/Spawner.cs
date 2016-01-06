@@ -33,6 +33,9 @@ public class Spawner : MonoBehaviour
     //Return reference to spawned gameobject
     public GameObject Spawn(bool SetActive = true)
     {
+        //No object pool, just using position of spawner
+        if (m_ObjPoolRef == null) return null;
+
         GameObject obj = m_ObjPoolRef.NextPooledObject(false);
 
         //If no inactive objects in pool, return

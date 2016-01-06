@@ -8,7 +8,7 @@ public class Regulator : MonoBehaviour {
     private float m_startTime;
     private float m_timer = 0f;
     private float m_lastTime = 0f;
-    public bool m_timing = false;
+    public bool m_timing { get; private set; }
 
     //DeltaTime calculated in real time
     private float deltaTime = 0.0f;
@@ -21,6 +21,7 @@ public class Regulator : MonoBehaviour {
 
 	void Awake ()
     {
+        m_timing = false;
         m_startTime = Time.realtimeSinceStartup;
 	}
 	

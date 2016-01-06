@@ -11,11 +11,11 @@ public class GameManager : MonoBehaviour {
     public GameObject player;
     private Text killCount;
 
-    public Vector3 playerSpawn;
+    private Vector3 m_PlayerSpawn;
     public Vector3 enemySpawn;
 
     //This s strictly code. Is that okay? Make static class/singleton?
-    public EntityHashTable entityTable;
+    public EntityHashTable entityTable { get; private set; }
 
     public float respawnTime = 1f;
 
@@ -23,9 +23,9 @@ public class GameManager : MonoBehaviour {
 
     public ObjectPool m_EnemyPool;
     public ObjectPool m_LaserShotPool;
-    public Dictionary<GameObject, ObjectPool> objectPoolLookup;
+    public Dictionary<GameObject, ObjectPool> objectPoolLookup { get; private set; }
     
-    public Regulator globalRegulator;
+    public Regulator globalRegulator { get; private set; }
 
     private int m_KillCount = 0;
 
@@ -49,8 +49,6 @@ public class GameManager : MonoBehaviour {
 
         objectPoolLookup = new Dictionary<GameObject, ObjectPool>();
 
-        //Run Level Init (?) from inside GM
-        //Mov to readng a LevelConfig?
         Init();
 
         InitLevel();
@@ -130,23 +128,29 @@ public class GameManager : MonoBehaviour {
     {
         //Call Init on spawners
         EventManager.PostMessage<InitSpawnersMessage>(new InitSpawnersMessage());
-        
-        SpawnPlayer();
 
         //Grab spawners manually. If message works, get rid of
         GameObject[] spawners = GameObject.FindGameObjectsWithTag(Tags.spawner);
 
-        foreach(var spaw in spawners)
+        foreach (var spawner in spawners)
         {
             //Manual init. This will do until init sequence can be better controlled
-            spaw.GetComponent<Spawner>().Init(new InitSpawnersMessage());
+            spawner.GetComponent<Spawner>().Init(new InitSpawnersMessage());
 
             //Spawn object and store reference
-            GameObject obj = spaw.GetComponent<Spawner>().Spawn(false);
-            //If no spawnable objects in this pool move on to next spawner
-            if (obj == null) continue;
+            GameObject obj = spawner.GetComponent<Spawner>().Spawn(false);
+
             //For enemy spawn, change this
-            if (obj.CompareTag(Tags.enemy)) obj.GetComponent<Enemy>().Respawn();
+            if (spawner.GetComponent<Spawner>().EntityToSpawn.CompareTag(Tags.enemy)) obj.GetComponent<Enemy>().Respawn();
+
+            //Spawn player and store spawn pos
+            else if (spawner.GetComponent<Spawner>().EntityToSpawn.CompareTag(Tags.player))
+            {
+                SpawnPlayer(spawner.transform);
+                //Store spawn pos for respawn
+                //Store reference to this spawner instead?
+                m_PlayerSpawn = spawner.transform.position;
+            }
         }
     }
 
@@ -172,17 +176,18 @@ public class GameManager : MonoBehaviour {
 
     void RespawnPlayer()
     {
-        m_Player.transform.position = playerSpawn;
+        //Store player spawner instead?
+        m_Player.transform.position = m_PlayerSpawn;
         m_Player.SetActive(true);
         EventManager.PostMessage<PlayerRespawnedMessage>(new PlayerRespawnedMessage(Vector3.forward));
     }
 
     //Instantiate player prefab at player spawn or reset position
-    void SpawnPlayer()
+    void SpawnPlayer(Transform trans)
     {
         if(m_Player == null)
         {
-            m_Player = Instantiate(player, playerSpawn, Quaternion.identity) as GameObject;
+            m_Player = Instantiate(player, trans.position, Quaternion.identity) as GameObject;
             entityTable.AddToTable(m_Player);
         }
         else
@@ -215,7 +220,6 @@ public class GameManager : MonoBehaviour {
             Debug.Log("No registered pool for this GameObject");
             return null;
         }
-        Debug.Log(temp);
         return temp;
     }
 }

@@ -23,11 +23,13 @@ public class CameraController : MonoBehaviour {
 	void Start ()
     {
         m_Camera = GetComponent<Camera>();
+
         m_CameraTransform = m_Camera.transform;
-        target = GameObject.FindGameObjectWithTag(Tags.player).transform;
-        if(!target)
+        //Try to find player object, if not yet instantiated, find in first update
+        GameObject go = GameObject.FindGameObjectWithTag(Tags.player);
+        if(go)
         {
-            Debug.Log("Camera target not set");
+            target = go.transform;
         }
 
         m_DoFollow = true;
@@ -46,15 +48,16 @@ public class CameraController : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        if(m_DoFollow) Follow();
-
-        if(!target)
+        if (!target)
         {
             m_DoFollow = false;
             Invoke("OnTargetLoss", 2f);
         }
+
+        if (m_DoFollow) Follow();
     }
 
+    //TODO::FIX THIS. This is poorly done
     public IEnumerator ShakeCamera(float shakeTime)
     {
         Debug.Log("Shaking Camera");
@@ -64,7 +67,7 @@ public class CameraController : MonoBehaviour {
         {
             Vector3 offset = new Vector3(shakeDistance * Mathf.Sin(shakeSpeed*Time.deltaTime), 
                                          shakeDistance * Mathf.Cos(shakeSpeed * Time.deltaTime), 0f);
-            Vector3 newpos = startPos + offset;
+            Vector3 newpos = target.position + offset;
 
             m_CameraTransform.position = newpos;
             yield return null;
@@ -92,7 +95,7 @@ public class CameraController : MonoBehaviour {
     {
         m_DoFollow = false;
         Time.timeScale = 0.0f;
-        StartCoroutine(MoveCameraToTarget(m_CameraTransform, target, 2f));
+        StartCoroutine(MoveCameraToTarget(m_CameraTransform, target, 2f, this.easeFunction, this.e));
     }
 
     public Vector3 GetMousePosition()
@@ -105,7 +108,7 @@ public class CameraController : MonoBehaviour {
     }
 
     //Write Extension method if ever return values from Coroutine
-    IEnumerator MoveCameraToTarget(Transform mod, Transform curTarget, float duration)
+    IEnumerator MoveCameraToTarget(Transform mod, Transform curTarget, float duration, Easing.VectorEasingFunction easeFunction, EasingType e = EasingType.Linear)
     {
         float t = 0f;
         Vector3 targPos = curTarget.position + Vector3.forward * m_CameraTransform.position.z;

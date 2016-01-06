@@ -173,6 +173,11 @@ public class Power : MonoBehaviour {
         }
     }
 
+    virtual public void ExecuteSecondary()
+    {
+
+    }
+
     //Which Execute function of the power should be used
     public enum PowerUsageMode
     {
