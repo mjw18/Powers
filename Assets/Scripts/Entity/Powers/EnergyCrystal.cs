@@ -16,9 +16,9 @@ public class EnergyCrystal : Power
         GameObject freeCrystal = GameManager.instance.GetObjectPool(energyCrystalObject).NextPooledObject(false);
 
         //If there is a target, 
-        if (targetSelector.targets.Count > 0)
+        if (m_TargetSelector.targets.Count > 0)
         {
-            target = targetSelector.targets[0].GetComponent<Transform>();
+            target = m_TargetSelector.targets[0].GetComponent<Transform>();
             //Move to an "Enemy Frozen" method?
             target.GetComponent<Rigidbody2D>().gravityScale = 0.0f;
             target.GetComponent<Collider2D>().enabled = false;

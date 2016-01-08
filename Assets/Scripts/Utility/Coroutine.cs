@@ -13,12 +13,8 @@ public static class MonoBehaviourExt
 
 public class Coroutine<T>
 {
-    private T returnVal;
+    public T returnVal { get; private set; }
 
-    public T retVal
-    {
-        get { return returnVal; }
-    }
     public Coroutine coroutine;
 
     public IEnumerator InternalRoutine(IEnumerator coroutine)
@@ -44,8 +40,8 @@ public class Coroutine<T>
             }
             else
             {
-                Debug.Log("The return value was found, output continuous" + coroutine.Current);
-                if(coroutine.Current is T) returnVal = (T)coroutine.Current; 
+                //Debug.Log("The return value was found, output continuous" + coroutine.Current);
+                //if(coroutine.Current is T) returnVal = (T)coroutine.Current; 
                 yield return coroutine.Current;
             }
         }

@@ -4,17 +4,22 @@ using System.Collections.Generic;
 
 public class TargetSelector : MonoBehaviour {
 
-    private CircleCollider2D m_Selector;
-    private Transform m_Transform;
+    protected Power m_Power;
 
-    private GameObject m_SelectorSprite;
-    private CameraController m_CameraController;
-    private LineRenderer m_LineRenderer;
+    protected CircleCollider2D m_Selector; 
+
+    protected Transform m_Transform;
+
+    protected SpriteRenderer m_SelectorSprite;
+    protected CameraController m_CameraController;
+    protected LineRenderer m_LineRenderer;
+
     public List<GameObject> targets;
     public RaycastHit2D[] targetRayHit;
     public RaycastHit2D[] targetRayHitAlloc;
+
     public Vector2 origin;
-    private Vector3 endPosition;
+    protected Vector3 endPosition;
 
     public float maxRange;
 
@@ -24,6 +29,8 @@ public class TargetSelector : MonoBehaviour {
     //Use start so that loader initializes first, load with loader? I think this is best. Maybe put in Game manager then
 	void Start ()
     {
+        m_Power = GetComponentInParent<Power>();
+
         targetRayHitAlloc = new RaycastHit2D[10];
 
         m_Transform = transform;
@@ -38,12 +45,30 @@ public class TargetSelector : MonoBehaviour {
         {
             Debug.Log("Selector collider not assigned");
         }
+
+        //Selector radius sets size of circle cast and targeted trigger
+        radius = m_Power.powerConfig.effectRadius;
         m_Selector.radius = radius;
-        m_SelectorSprite = GameObject.Find("SelectorSprite");
+
+        //Set target selector range to power range
+        maxRange = m_Power.powerConfig.range;
+
+        m_SelectorSprite = GetComponent<SpriteRenderer>();
+        if(!m_SelectorSprite) m_SelectorSprite = GameObject.Find("SelectorSprite").GetComponent<SpriteRenderer>();
+
+        //Deactivate the target selector
         gameObject.SetActive(false);
 	}
 
-	void Update ()
+    void Update()
+    {
+        UpdateSelector();
+
+        //Set the linerenderer's bounds
+        SetLineBounds();
+    }
+
+	virtual protected void UpdateSelector ()
     {
         //Have to intialize htiPosition. Filled later with rayCast result
         Vector3 hitPosition = Vector3.forward;
@@ -74,13 +99,10 @@ public class TargetSelector : MonoBehaviour {
             m_Transform.position = Vector3.SqrMagnitude((Vector3)origin - hitPosition) < Vector3.SqrMagnitude((Vector3)origin - endPosition) ? 
                                    hitPosition : Vector3.ClampMagnitude(endPosition - (Vector3)origin, maxRange) + (Vector3)origin;
         }
-        
-        //Set the linerenderer's bounds
-        SetLineBounds();
 	}
 
     //Move to separate gameobject
-    void SetLineBounds()
+    protected void SetLineBounds()
     {
         m_LineRenderer.SetPosition(0, origin);
         m_LineRenderer.SetPosition(1, transform.position);
@@ -92,7 +114,7 @@ public class TargetSelector : MonoBehaviour {
         m_Selector.radius = (tRadius > 0f) ? tRadius : singleTargetRadius;
     }
 
-    public void SelectTargets(out RaycastHit2D hit)
+    virtual public void SelectTargets(out RaycastHit2D hit)
     {
         hit = new RaycastHit2D();
 
@@ -110,7 +132,7 @@ public class TargetSelector : MonoBehaviour {
             }
         }
 
-        foreach(var rayHit in Physics2D.RaycastAll(origin, transform.position - (Vector3)origin))
+        foreach(var rayHit in Physics2D.RaycastAll(origin, transform.position - (Vector3)origin, maxRange))
         {
             Collider2D col = rayHit.collider;
             if((col.CompareTag(Tags.enemy) || col.CompareTag(Tags.interactable)) && col.gameObject != gameObject)
@@ -122,7 +144,6 @@ public class TargetSelector : MonoBehaviour {
 
         //Raycast didn't intersect anything, set point on null to clicked position
         if(hit.point == Vector2.zero) hit.point = m_CameraController.GetMousePosition();
-        Debug.Log(hit.point);
     }
 
     void OnTriggerEnter2D(Collider2D other)

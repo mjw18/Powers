@@ -10,12 +10,24 @@ using System.Collections.Generic;
 //Consider virtual "CanHitTarget" Function that does not allow selection of unreachable targets
 public class Power : MonoBehaviour {
 
+    //Which Execute function of the power should be used
+    public enum PowerUsageMode
+    {
+        Primary,
+        Secondary,
+        Defensive,
+        Movement,
+        Passive,
+        Unassigned
+    }
+
     public int cooldown;
-    protected KeyCode keyCode;
+    public KeyCode keyCode;
 
     public PowerConfig powerConfig;
     public PowerUsageMode usageMode = PowerUsageMode.Unassigned;
 
+    protected bool doExecute = true; //>This is no good!!!
     protected bool m_UsingPower = false;
     public bool canUsePower
     {
@@ -24,11 +36,12 @@ public class Power : MonoBehaviour {
 
     public GameObject m_Player;
     public Transform target;
-    protected TargetSelector targetSelector;
+    public GameObject targetSelector;
+    protected TargetSelector m_TargetSelector;
     protected RaycastHit2D m_Hit;
 
     protected Player player;
-    protected Rigidbody2D playerRigidbody;
+    protected Rigidbody2D m_PlayerRigidbody;
     protected Transform m_PlayerTransform;
     protected Transform m_ShootPosition;
 
@@ -41,22 +54,20 @@ public class Power : MonoBehaviour {
 
     protected void Init()
     {
-        player = GetComponent<Player>();
-        playerRigidbody = player.GetComponent<Rigidbody2D>();
-        m_PlayerTransform = player.transform;
+        m_Player = GetComponentInParent<PowerManager>().playerGameObject;
+        m_PlayerRigidbody = m_Player.GetComponent<Rigidbody2D>();
+        m_PlayerTransform = m_Player.transform;
+
+        //Reference to Player component
+        player = m_Player.GetComponent<Player>();
         m_ShootPosition = player.shootPosition;
 
-        //Change this, init in GameController? specific to each power?
-        GameObject tempSelector = GameObject.Find(Tags.targetSelector);
-        if (tempSelector) targetSelector = tempSelector.GetComponent<TargetSelector>();
-        targetSelector.maxRange = powerConfig.range;
+        //Instantiate target selector from reference
+        GameObject tempSelector = Instantiate(targetSelector) as GameObject;
+        tempSelector.transform.SetParent(transform);
+        m_TargetSelector = tempSelector.GetComponent<TargetSelector>();
 
         refRegulator = GameManager.instance.globalRegulator;
-
-        m_Player = this.gameObject;
-
-        if (usageMode == PowerUsageMode.Unassigned) Debug.Log("not yet");
-        else SetKey();
     }
 
     //Use AbilityVisualEffect Offset
@@ -100,68 +111,82 @@ public class Power : MonoBehaviour {
     void AcquireTargets()
     {
         //Negative input value sets to singlee target acquisition
-        targetSelector.ResizeSelector(powerConfig.effectRadius);
-        targetSelector.gameObject.SetActive(true);
+        //Move tom_TargetSelector init?
+        m_TargetSelector.ResizeSelector(powerConfig.effectRadius);
+        m_TargetSelector.gameObject.SetActive(true);
 
         //On mouse click, select targets
         if(Input.GetMouseButtonDown(0))
         {
-            targetSelector.SelectTargets(out m_Hit);
+            m_TargetSelector.SelectTargets(out m_Hit);
         }
 
-        targetSelector.gameObject.SetActive(false);
+        m_TargetSelector.gameObject.SetActive(false);
     }
-
-    public IEnumerator UsePrimaryPower()
+    
+    virtual public IEnumerator UsePrimaryPower()
     {
         m_UsingPower = true;
 
-        yield return StartCoroutine( refRegulator.SlowTimeScale(slowTime, slowTimeDuration, Easing.EaseOut, timeEaseType) );
-        yield return StartCoroutine( AcquireTarget() );
-        yield return StartCoroutine( refRegulator.ResetTimeScale(speedTimeDuration, Easing.EaseOut, timeEaseType));
-        Execute();
+        //Use try catch or the special coroutine?
+        doExecute = true;
+
+        yield return StartCoroutine(GetTargets(1f));
+
+        if(doExecute) Execute();
 
         m_UsingPower = false;
     }
 
-    IEnumerator AcquireTarget()
+    virtual public IEnumerator UseSecondaryPower()
     {
-        targetSelector.origin = m_Player.transform.position;
-        targetSelector.gameObject.SetActive(true);
+        yield return null;
+    }
+
+    //Just the slowdown select and speed up bits
+    protected IEnumerator GetTargets(float duration = -1f)
+    {
+        yield return StartCoroutine(refRegulator.SlowTimeScale(slowTime, slowTimeDuration, Easing.EaseOut, timeEaseType));
+        yield return StartCoroutine(AcquireTarget(duration));
+        yield return StartCoroutine(refRegulator.ResetTimeScale(speedTimeDuration, Easing.EaseOut, timeEaseType));
+    }
+
+    IEnumerator AcquireTarget(float duration = -1f)
+    {
+        m_TargetSelector.origin = m_Player.transform.position;
+        m_TargetSelector.gameObject.SetActive(true);
+
+        //Set up target time timer
+        float t = 0.0f;
+        float rate = -1f;
+        if (duration > 0f) rate = 1f / duration;
 
         while (!Input.GetMouseButtonDown(0))
         {
-            targetSelector.origin = player.shootPosition.position;
+            m_TargetSelector.origin = player.shootPosition.position;
+
             //If user presses key again, exit. Switch later to hold and release
-            if (Input.GetKeyDown(keyCode))
+            if (Input.GetKeyDown(keyCode) || t > 1f)
             {
-                targetSelector.gameObject.SetActive(false);
+                m_TargetSelector.gameObject.SetActive(false);
+                doExecute = false;
                 yield break;
             }
+
+            //Increase timer in GAME TIME
+            if(rate > 0f) t += rate * Time.deltaTime;
 
             yield return null;
         }
 
         //Mouse has been pressed and targets have been added
-        targetSelector.SelectTargets(out m_Hit);
-        targetSelector.gameObject.SetActive(false);
+        m_TargetSelector.SelectTargets(out m_Hit);
+        m_TargetSelector.gameObject.SetActive(false);
         
         //Write new yield command
         yield return new WaitForSeconds(0.2f);
-    }
-
-    //TODO : Establish keybindings in powerManager
-    public void SetKey()
-    {
-        switch(usageMode)
-        {
-            case PowerUsageMode.Primary:
-                //keyCode = m_Player.GetComponent<PlayerController>().primaryPowerKey;
-                break;
-            case PowerUsageMode.Secondary:
-                //keyCode = m_Player.GetComponent<PlayerController>().secondaryPowerKey;
-                break;
-        }
+        //Can Execute
+        yield return true;
     }
 
     //Have a switch here for usage mode exeute?
@@ -176,17 +201,6 @@ public class Power : MonoBehaviour {
     virtual public void ExecuteSecondary()
     {
 
-    }
-
-    //Which Execute function of the power should be used
-    public enum PowerUsageMode
-    {
-        Primary,
-        Secondary,
-        Defensive,
-        Movement,
-        Passive,
-        Unassigned
     }
 }
 

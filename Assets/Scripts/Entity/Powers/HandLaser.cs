@@ -43,16 +43,14 @@ public class HandLaser : Power {
 
     Vector3 GetShootDirection()
     {
-        //Default charge direction is forward
+        //Default shoot direction is forward
         Vector3 rayToTarget = Vector3.right * player.facing;
 
-        Debug.Log((m_Hit.point.y - m_ShootPosition.position.y)/(m_Hit.point.x - m_ShootPosition.position.x));
-
         //Get ray to chosen target, change to use DamageType
-        if (targetSelector.targets.Count == 0) return m_Hit.point - (Vector2)m_ShootPosition.position;
+        if (m_TargetSelector.targets.Count == 0) return m_Hit.point - (Vector2)m_ShootPosition.position;
 
         //Store target in power, why, I don't know
-        target = targetSelector.targets[0].GetComponent<Transform>();
+        target = m_TargetSelector.targets[0].GetComponent<Transform>();
 
         return m_Hit.point - (Vector2)m_ShootPosition.position;
     }

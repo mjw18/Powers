@@ -60,21 +60,21 @@ public class CameraController : MonoBehaviour {
     //TODO::FIX THIS. This is poorly done
     public IEnumerator ShakeCamera(float shakeTime)
     {
-        Debug.Log("Shaking Camera");
         float endTime = Time.time + shakeTime;
-        Vector3 startPos = m_Camera.transform.position;
+        float cameraZ = m_Camera.transform.position.z;
         while(Time.time <= endTime)
         {
             Vector3 offset = new Vector3(shakeDistance * Mathf.Sin(shakeSpeed*Time.deltaTime), 
-                                         shakeDistance * Mathf.Cos(shakeSpeed * Time.deltaTime), 0f);
+                                         shakeDistance * Mathf.Cos(shakeSpeed * Time.deltaTime), cameraZ);
             Vector3 newpos = target.position + offset;
 
+            //Camera position set to target plus sinusoidal offset
             m_CameraTransform.position = newpos;
             yield return null;
         }
 
-        m_CameraTransform.position = startPos;
-        Debug.Log("ShakeComplete");
+        //Camera is set back on target position
+        m_CameraTransform.position = new Vector3(target.position.x, target.position.y, cameraZ);
         yield return null;
     }
 

@@ -29,7 +29,8 @@ public class PlayerController : MonoBehaviour
         m_ShootPosition = GameObject.Find("ShootPosition").transform;
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
 
-        m_PowerManager = GetComponent<PowerManager>();
+        //Make Component
+        m_PowerManager = GetComponentInChildren<PowerManager>();
 
         //Fuck using strings though
         chargeTimeText = GameObject.Find("EnergyText").GetComponent<Text>();
@@ -51,20 +52,20 @@ public class PlayerController : MonoBehaviour
             Jump();
         }
         
-        //Doesn't check for power in use soon enough
-        //Add null check on power in case one is not used
-        if (Input.GetKeyDown(m_PowerManager.primaryPowerKey))
+        //Use Power if it is assigned and key pressed
+        if (m_PowerManager.primaryPower && Input.GetKeyDown(m_PowerManager.primaryPowerKey))
         {
-            if (m_Player.UseEnergy(m_PowerManager.primaryPower.powerConfig.energyCost) && m_PowerManager.primaryPower.canUsePower)
+            //Is the power already in use? Is there enough energy?
+            if (m_PowerManager.primaryPower.canUsePower && m_Player.UseEnergy(m_PowerManager.primaryPower.powerConfig.energyCost))
             {
-                if (m_PowerManager.primaryPower) StartCoroutine(m_PowerManager.primaryPower.UsePrimaryPower());
+                StartCoroutine(m_PowerManager.primaryPower.UsePrimaryPower());
             }
         }
-        else if (Input.GetKeyDown(m_PowerManager.secondaryPowerKey))
+        else if (m_PowerManager.secondaryPower && Input.GetKeyDown(m_PowerManager.secondaryPowerKey))
         {
             if (m_Player.UseEnergy(m_PowerManager.secondaryPower.powerConfig.energyCost) && m_PowerManager.secondaryPower.canUsePower)
             {
-                if (m_PowerManager.secondaryPower) StartCoroutine(m_PowerManager.secondaryPower.UsePrimaryPower());
+                StartCoroutine(m_PowerManager.secondaryPower.UsePrimaryPower());
             }
         }
     }

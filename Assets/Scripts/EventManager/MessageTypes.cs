@@ -76,4 +76,16 @@ namespace ExtendedEvents
             //Do nothing (for now atleast)
         }
     }
+
+    public class PowerChangeMessage : MessageInfo
+    {
+        public PowerManager.PowerName associatedPower;
+        public Power.PowerUsageMode usageModeOfSlot;
+
+        public PowerChangeMessage(PowerManager.PowerName power, Power.PowerUsageMode usageMode)
+        {
+            associatedPower = power;
+            usageModeOfSlot = usageMode;
+        }
+    }
 }

@@ -49,7 +49,7 @@ public class PlatformMover : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject == m_Player && !m_PlayerOnPlatform)
+        if (other.CompareTag(Tags.player) && !m_PlayerOnPlatform)
         {
             m_PlayerOnPlatform = true;
             if(!m_ReturnRegulator.m_timing) MovePlatform();
