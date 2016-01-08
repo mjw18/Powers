@@ -58,14 +58,21 @@ public class PlayerController : MonoBehaviour
             //Is the power already in use? Is there enough energy?
             if (m_PowerManager.primaryPower.canUsePower && m_Player.UseEnergy(m_PowerManager.primaryPower.powerConfig.energyCost))
             {
-                StartCoroutine(m_PowerManager.primaryPower.UsePrimaryPower());
+                StartCoroutine(m_PowerManager.primaryPower.UsePower());
             }
         }
         else if (m_PowerManager.secondaryPower && Input.GetKeyDown(m_PowerManager.secondaryPowerKey))
         {
             if (m_Player.UseEnergy(m_PowerManager.secondaryPower.powerConfig.energyCost) && m_PowerManager.secondaryPower.canUsePower)
             {
-                StartCoroutine(m_PowerManager.secondaryPower.UsePrimaryPower());
+                StartCoroutine(m_PowerManager.secondaryPower.UsePower());
+            }
+        }
+        else if (m_PowerManager.defensivePower && Input.GetKeyDown(m_PowerManager.defensivePowerKey))
+        {
+            if (m_Player.UseEnergy(m_PowerManager.defensivePower.powerConfig.energyCost) && m_PowerManager.defensivePower.canUsePower)
+            {
+                StartCoroutine(m_PowerManager.defensivePower.UsePower());
             }
         }
     }

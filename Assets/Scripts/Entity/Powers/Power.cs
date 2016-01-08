@@ -124,7 +124,7 @@ public class Power : MonoBehaviour {
         m_TargetSelector.gameObject.SetActive(false);
     }
     
-    virtual public IEnumerator UsePrimaryPower()
+    virtual public IEnumerator UsePower()
     {
         m_UsingPower = true;
 
