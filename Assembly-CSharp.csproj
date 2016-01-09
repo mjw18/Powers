@@ -45,7 +45,6 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\MainPlayButton.cs" />
      <Compile Include="Assets\Scripts\Camera\CameraController.cs" />
      <Compile Include="Assets\Scripts\Entity\Enemy\Enemy.cs" />
      <Compile Include="Assets\Scripts\Entity\Enemy\EnemyConfig.cs" />
@@ -56,13 +55,30 @@
      <Compile Include="Assets\Scripts\Entity\Player\PlayerDefaultState.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\PlayerPowerUpState.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\PlayerStateMachine.cs" />
-     <Compile Include="Assets\Scripts\Entity\Powers\Charge.cs" />
-     <Compile Include="Assets\Scripts\Entity\Powers\HandLaser.cs" />
-     <Compile Include="Assets\Scripts\Entity\Powers\LaserShot.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\ChargePower\Charge.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\ChargePower\ChargeMovement.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\ChargePower\ChargeSecondary.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\EnergyCrystal.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\EnergyCrystalDefensive.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\FreeCrystalObject.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\HandLaser.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\LaserShot.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\ShotMover.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\Power.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\PowerConfig.cs" />
-     <Compile Include="Assets\Scripts\Entity\Powers\ShotMover.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\PowerContainer.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\PowerManager.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\WarpPower\Warp.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\WarpPower\WarpSecondary.cs" />
+     <Compile Include="Assets\Scripts\Entity\Spawner.cs" />
+     <Compile Include="Assets\Scripts\EventManager\EventManager.cs" />
+     <Compile Include="Assets\Scripts\EventManager\MessageTypes.cs" />
      <Compile Include="Assets\Scripts\TestMessager.cs" />
+     <Compile Include="Assets\Scripts\UI\ItemDragHandler.cs" />
+     <Compile Include="Assets\Scripts\UI\PowerDropSlot.cs" />
+     <Compile Include="Assets\Scripts\UI\UIDirectionMover.cs" />
+     <Compile Include="Assets\Scripts\UI\UIDropHandler.cs" />
+     <Compile Include="Assets\Scripts\Utility\ChargeSecondaryTargetSelector.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateEnemyConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateLevelConfig.cs" />
@@ -70,17 +86,20 @@
      <Compile Include="Assets\Scripts\Utility\Coroutine.cs" />
      <Compile Include="Assets\Scripts\Utility\DestroyByTime.cs" />
      <Compile Include="Assets\Scripts\Utility\Easing.cs" />
-     <Compile Include="Assets\Scripts\Utility\EventManager.cs" />
+     <Compile Include="Assets\Scripts\Utility\EntityHashTable.cs" />
      <Compile Include="Assets\Scripts\Utility\GameManager.cs" />
      <Compile Include="Assets\Scripts\Utility\KillBox.cs" />
      <Compile Include="Assets\Scripts\Utility\LevelConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\Loader.cs" />
+     <Compile Include="Assets\Scripts\Utility\MainPlayButton.cs" />
      <Compile Include="Assets\Scripts\Utility\ObjectPool.cs" />
      <Compile Include="Assets\Scripts\Utility\Regulator.cs" />
      <Compile Include="Assets\Scripts\Utility\State.cs" />
      <Compile Include="Assets\Scripts\Utility\StateMachine.cs" />
+     <Compile Include="Assets\Scripts\Utility\Tags.cs" />
      <Compile Include="Assets\Scripts\Utility\TargetSelector.cs" />
      <Compile Include="Assets\Scripts\VisualEffects\ChargeCollisionEffect.cs" />
+     <Compile Include="Assets\Scripts\VisualEffects\LaserCollisionEffect.cs" />
      <Compile Include="Assets\Scripts\VisualEffects\VisualEffect.cs" />
      <Compile Include="Assets\Spawner.cs" />
  <Reference Include="UnityEngine.UI">

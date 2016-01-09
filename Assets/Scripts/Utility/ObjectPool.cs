@@ -18,6 +18,7 @@ public class ObjectPool : MonoBehaviour{
     {
         if(objectPool.Count > 0)  objectPool.Clear();
 
+        //instantiate and add objects to pool
         for (int i = 0; i < size; i++)
         {
             GameObject temp = Instantiate(pooledObject) as GameObject;

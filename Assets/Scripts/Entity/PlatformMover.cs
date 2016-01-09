@@ -7,6 +7,7 @@ public class PlatformMover : MonoBehaviour
     public float distance;
     public bool StartAtTop = false;
     public bool moveBackFromMax = true;
+    public bool playerMovement = true;
     public float angle;
 
     private float m_Direction = 1f;

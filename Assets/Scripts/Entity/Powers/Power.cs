@@ -52,6 +52,7 @@ public class Power : MonoBehaviour {
     public float slowTimeDuration = 0.6f;
     public float speedTimeDuration = 0.2f;
 
+    //This must be called before use! Put in awake of inherited power
     protected void Init()
     {
         m_Player = GetComponentInParent<PowerManager>().playerGameObject;
@@ -63,9 +64,13 @@ public class Power : MonoBehaviour {
         m_ShootPosition = player.shootPosition;
 
         //Instantiate target selector from reference
-        GameObject tempSelector = Instantiate(targetSelector) as GameObject;
-        tempSelector.transform.SetParent(transform);
-        m_TargetSelector = tempSelector.GetComponent<TargetSelector>();
+        //Some powers don't nedd a target selector. This allows that
+        if(targetSelector != null)
+        {
+            GameObject tempSelector = Instantiate(targetSelector) as GameObject;
+            tempSelector.transform.SetParent(transform);
+            m_TargetSelector = tempSelector.GetComponent<TargetSelector>();
+        }
 
         refRegulator = GameManager.instance.globalRegulator;
     }

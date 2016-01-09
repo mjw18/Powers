@@ -210,3 +210,9 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/Assets
+/Builds
+/Library/metadata
+/Library/ScriptAssemblies
+/Library/ShaderCache
+/Library/CrashedAssetImports.txt

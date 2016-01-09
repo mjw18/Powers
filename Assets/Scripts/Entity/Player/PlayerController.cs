@@ -68,6 +68,13 @@ public class PlayerController : MonoBehaviour
                 StartCoroutine(m_PowerManager.secondaryPower.UsePower());
             }
         }
+        else if (m_PowerManager.movementPower && Input.GetKeyDown(m_PowerManager.movementPowerKey))
+        {
+            if (m_Player.UseEnergy(m_PowerManager.movementPower.powerConfig.energyCost) && m_PowerManager.movementPower.canUsePower)
+            {
+                StartCoroutine(m_PowerManager.movementPower.UsePower());
+            }
+        }
         else if (m_PowerManager.defensivePower && Input.GetKeyDown(m_PowerManager.defensivePowerKey))
         {
             if (m_Player.UseEnergy(m_PowerManager.defensivePower.powerConfig.energyCost) && m_PowerManager.defensivePower.canUsePower)
