@@ -46,7 +46,7 @@ public class Power : MonoBehaviour {
     protected Transform m_ShootPosition;
 
     //Time control
-    private Regulator refRegulator;
+    protected Regulator refRegulator;
     public float slowTime = 0.2f;
     public EasingType timeEaseType = EasingType.Quadratic;
     public float slowTimeDuration = 0.6f;
@@ -74,62 +74,17 @@ public class Power : MonoBehaviour {
 
         refRegulator = GameManager.instance.globalRegulator;
     }
-
-    //Use AbilityVisualEffect Offset
-    void SetEffectPosition(VisualEffect effect, VisualEffectPlacement effectPlacement, Vector3 offset)
-    {
-        switch (effectPlacement)
-        {
-            case VisualEffectPlacement.CenteredOnPlayer:
-                effect.SetPosition(m_PlayerTransform.position);
-                break;
-            case VisualEffectPlacement.CenteredAtTarget:
-                effect.SetPosition(target.position);
-                break;
-            case VisualEffectPlacement.OffsetPlayer:
-                effect.SetPosition(m_PlayerTransform.position + offset);
-                break;
-            case VisualEffectPlacement.OffsetTarget:
-                effect.SetPosition(target.position + offset);
-                break;
-            default:
-                Debug.Log("Visual Effect Placement not set");
-                break;
-        }
-    }
-
-    public void DamageTarget()
-    {
-        switch (powerConfig.damageType)
-        {
-            case DamageType.SingleTarget:
-            case DamageType.SingleTargetDuration:
-                Debug.Log("SingleTargetAcquisition");
-                break;
-            case DamageType.AreaEffect:
-            case DamageType.AreaEffectDuration:
-                Debug.Log("AreaEffectTargetAcuisition");
-                break;
-        }
-    }
-
-    void AcquireTargets()
-    {
-        //Negative input value sets to singlee target acquisition
-        //Move tom_TargetSelector init?
-        m_TargetSelector.ResizeSelector(powerConfig.effectRadius);
-        m_TargetSelector.gameObject.SetActive(true);
-
-        //On mouse click, select targets
-        if(Input.GetMouseButtonDown(0))
-        {
-            m_TargetSelector.SelectTargets(out m_Hit);
-        }
-
-        m_TargetSelector.gameObject.SetActive(false);
-    }
     
-    virtual public IEnumerator UsePower()
+    //public function to get power execution
+    //Override if coroutine not used 
+    virtual public void ExecutePower()
+    {
+        IEnumerator powerAction = UsePower();
+        StartCoroutine(powerAction);
+    }
+
+    //main execution coroutine. Overriden by most powers
+    virtual protected IEnumerator UsePower()
     {
         m_UsingPower = true;
 
@@ -143,11 +98,6 @@ public class Power : MonoBehaviour {
         m_UsingPower = false;
     }
 
-    virtual public IEnumerator UseSecondaryPower()
-    {
-        yield return null;
-    }
-
     //Just the slowdown select and speed up bits
     protected IEnumerator GetTargets(float duration = -1f)
     {
@@ -156,7 +106,8 @@ public class Power : MonoBehaviour {
         yield return StartCoroutine(refRegulator.ResetTimeScale(speedTimeDuration, Easing.EaseOut, timeEaseType));
     }
 
-    IEnumerator AcquireTarget(float duration = -1f)
+    //Calls the TargetSelectors select target function
+    protected IEnumerator AcquireTarget(float duration = -1f)
     {
         m_TargetSelector.origin = m_Player.transform.position;
         m_TargetSelector.gameObject.SetActive(true);
@@ -195,7 +146,7 @@ public class Power : MonoBehaviour {
     }
 
     //Have a switch here for usage mode exeute?
-    virtual public void Execute()
+    virtual protected void Execute()
     {
         foreach( var effect in powerConfig.visualEffects )
         {
@@ -203,9 +154,42 @@ public class Power : MonoBehaviour {
         }
     }
 
-    virtual public void ExecuteSecondary()
+    //Use AbilityVisualEffect Offset
+    void SetEffectPosition(VisualEffect effect, VisualEffectPlacement effectPlacement, Vector3 offset)
     {
+        switch (effectPlacement)
+        {
+            case VisualEffectPlacement.CenteredOnPlayer:
+                effect.SetPosition(m_PlayerTransform.position);
+                break;
+            case VisualEffectPlacement.CenteredAtTarget:
+                effect.SetPosition(target.position);
+                break;
+            case VisualEffectPlacement.OffsetPlayer:
+                effect.SetPosition(m_PlayerTransform.position + offset);
+                break;
+            case VisualEffectPlacement.OffsetTarget:
+                effect.SetPosition(target.position + offset);
+                break;
+            default:
+                Debug.Log("Visual Effect Placement not set");
+                break;
+        }
+    }
 
+    public void DamageTarget()
+    {
+        switch (powerConfig.damageType)
+        {
+            case DamageType.SingleTarget:
+            case DamageType.SingleTargetDuration:
+                Debug.Log("SingleTargetAcquisition");
+                break;
+            case DamageType.AreaEffect:
+            case DamageType.AreaEffectDuration:
+                Debug.Log("AreaEffectTargetAcuisition");
+                break;
+        }
     }
 }
 

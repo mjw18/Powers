@@ -47,7 +47,7 @@ public class HealthBarController : MonoBehaviour
 
     IEnumerator ScaleHealth()
     {
-        float frac = m_Enemy.refData.health / m_Enemy.config.data.health;
+        float frac = m_Enemy.refData.health / m_Enemy.enemyConfig.data.health;
         if(frac >= 1)
         {
             yield break;

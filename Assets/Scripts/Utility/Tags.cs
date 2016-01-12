@@ -13,4 +13,5 @@ public class Tags
     public const string interactable = "Interactable";
     public const string targetSelector = "TargetSelector";
     public const string inventorySlot = "InventorySlot";
+    public const string ignoreTargetSelect = "IgnoreTargetSelect";
 }

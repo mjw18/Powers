@@ -2,18 +2,18 @@
 using ExtendedEvents;
 using System.Collections;
 
-public class Player : MonoBehaviour
+public class Player : Agent
 {
-    private float health = 100f;
-
-    public float maxSpeed = 10f;
+    public float maxSpeed = 8f;
     public float jumpForce = 100f;
+
+    //Player control state
     public int facing = 1;
-
     public bool canMove = true;
+    public bool isAiming = false;
 
-    public float maxEnergy = 30.0f;
-    public float energyRechargeRate = 3f;
+    new public float maxEnergy = 30.0f;
+    new public float energyRechargeRate = 2.5f;
     public float energy;
 
     //Ground checking, move to separate script to attach to other entities
@@ -33,10 +33,8 @@ public class Player : MonoBehaviour
     private BoxCollider2D m_collider;
     private Animator m_animController;
 
-    // Use this for initialization
     void Awake ()
     {
-
         shootPosition = GameObject.Find("ShootPosition").GetComponent<Transform>();
         m_GroundCheck = GameObject.Find("GroundCheck").GetComponent<Transform>();
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
@@ -44,7 +42,6 @@ public class Player : MonoBehaviour
         m_animController = GetComponent<Animator>();
     }
 	
-	// Update is called once per frame
 	void Update ()
     {
         //Handle player energy for powers
@@ -53,7 +50,7 @@ public class Player : MonoBehaviour
 
     public bool CheckGrounded()
     {
-        //Move all this to separate script
+        //Use Layers?
         Collider2D[] cols = Physics2D.OverlapCircleAll(m_GroundCheck.position, groundCheckRadius);
         foreach (Collider2D col in cols)
         {
@@ -69,8 +66,6 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         m_grounded = false;
-        // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-        // This can be done using layers instead but Sample Assets will not overwrite your project settings.
 
         m_grounded = CheckGround();
     }
@@ -104,16 +99,14 @@ public class Player : MonoBehaviour
         
     }
 
-    public void ApplyDamage(float damage)
+    public override void ApplyDamage(float damage)
     {
-        health -= damage;
-        if(health <= float.Epsilon)
-        {
-            OnPlayerDied();
-        }
+        base.ApplyDamage(damage);
+
+        //Animation/messaging?
     }
 
-    public void OnPlayerDied()
+    public override void OnDeath()
     {
         //EventManager.PostMessage(MessageKey.PlayerDied);
         gameObject.SetActive(false);

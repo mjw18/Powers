@@ -46,22 +46,28 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Camera\CameraController.cs" />
+     <Compile Include="Assets\Scripts\Entity\Agent.cs" />
+     <Compile Include="Assets\Scripts\Entity\AgentConfig.cs" />
      <Compile Include="Assets\Scripts\Entity\Enemy\Enemy.cs" />
      <Compile Include="Assets\Scripts\Entity\Enemy\EnemyConfig.cs" />
      <Compile Include="Assets\Scripts\Entity\HealthBarController.cs" />
+     <Compile Include="Assets\Scripts\Entity\IDamageable.cs" />
      <Compile Include="Assets\Scripts\Entity\PlatformMover.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\Player.cs" />
      <Compile Include="Assets\Scripts\Entity\Player\PlayerController.cs" />
-     <Compile Include="Assets\Scripts\Entity\Player\PlayerDefaultState.cs" />
-     <Compile Include="Assets\Scripts\Entity\Player\PlayerPowerUpState.cs" />
-     <Compile Include="Assets\Scripts\Entity\Player\PlayerStateMachine.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\ChargePower\Charge.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\ChargePower\ChargeMovement.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\ChargePower\ChargeSecondary.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\EnergyCrystal.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\EnergyCrystalDefensive.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\EnergyCrystalSecondary.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\FreeCrystalObject.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\DischargeBlast.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\HandLaser.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\LaserDefensiive.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\LaserMovement.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\LaserPrimary.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\LaserSecondary.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\LaserShot.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\ShotMover.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\Power.cs" />
@@ -70,6 +76,7 @@
      <Compile Include="Assets\Scripts\Entity\Powers\PowerManager.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\WarpPower\Warp.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\WarpPower\WarpSecondary.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\WarpRift.cs" />
      <Compile Include="Assets\Scripts\Entity\Spawner.cs" />
      <Compile Include="Assets\Scripts\EventManager\EventManager.cs" />
      <Compile Include="Assets\Scripts\EventManager\MessageTypes.cs" />
@@ -79,6 +86,7 @@
      <Compile Include="Assets\Scripts\UI\UIDirectionMover.cs" />
      <Compile Include="Assets\Scripts\UI\UIDropHandler.cs" />
      <Compile Include="Assets\Scripts\Utility\ChargeSecondaryTargetSelector.cs" />
+     <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateAgentConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateEnemyConfig.cs" />
      <Compile Include="Assets\Scripts\Utility\ConfigCreator\CreateLevelConfig.cs" />

@@ -3,9 +3,9 @@ using ExtendedEvents;
 using UnityEngine.UI;
 using System.Collections;
 
-public class Enemy : MonoBehaviour {
-
-    public EnemyConfig config;
+public class Enemy : Agent
+{
+    public EnemyConfig enemyConfig;
     public EnemyData refData; //> CHange this, its kinda dumb
 
     public bool targeted;
@@ -18,13 +18,13 @@ public class Enemy : MonoBehaviour {
 
 	void Awake ()
     {
-        refData = new EnemyData(config.data);
+        refData = new EnemyData(enemyConfig.data);
         m_HealthBar = GetComponentInChildren<HealthBarController>();
         m_FillImage.color = healthBarColor;
 	}
 
     //Deal specified damage to enemy, kill if health below 0
-    public void ApplyDamage(float damage)
+    public override void ApplyDamage(float damage)
     {
         StartCoroutine(MoveHealthBar(damage));
 
@@ -41,6 +41,11 @@ public class Enemy : MonoBehaviour {
         }
     }
 
+    public override void OnDeath()
+    {
+        Kill();
+    }
+
     //Deactivate enemy
     public void Kill()
     {
@@ -52,7 +57,7 @@ public class Enemy : MonoBehaviour {
     //Reuse inactive pooled enemy blob. Reset health value and health bar, then set active
     public void Respawn()
     {
-        refData.health = config.data.health;
+        refData.health = enemyConfig.data.health;
         m_Slider.value = refData.health;
         gameObject.SetActive(true);
     }

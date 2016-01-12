@@ -81,7 +81,7 @@ public class TargetSelector : MonoBehaviour {
         for(int i = 0; i < j; i++ )
         {
             RaycastHit2D hit = targetRayHitAlloc[i];
-            if(hit.collider.gameObject != gameObject && !hit.collider.CompareTag(Tags.player))
+            if(hit.collider.gameObject != gameObject && (!hit.collider.CompareTag(Tags.player) || !hit.collider.CompareTag(Tags.ignoreTargetSelect) ) )
             {
                 hitPosition = hit.point;
                 break;

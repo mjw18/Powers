@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     public Text chargeTimeText;     //> Delete?
     private Color defaultTextColor; //> Delete?
 
+    //References
     private Rigidbody2D m_rigidbody;
     private Collider2D m_Collider;
     private Regulator m_LaserRegulator;
@@ -58,28 +59,28 @@ public class PlayerController : MonoBehaviour
             //Is the power already in use? Is there enough energy?
             if (m_PowerManager.primaryPower.canUsePower && m_Player.UseEnergy(m_PowerManager.primaryPower.powerConfig.energyCost))
             {
-                StartCoroutine(m_PowerManager.primaryPower.UsePower());
+                m_PowerManager.primaryPower.ExecutePower();
             }
         }
         else if (m_PowerManager.secondaryPower && Input.GetKeyDown(m_PowerManager.secondaryPowerKey))
         {
             if (m_Player.UseEnergy(m_PowerManager.secondaryPower.powerConfig.energyCost) && m_PowerManager.secondaryPower.canUsePower)
             {
-                StartCoroutine(m_PowerManager.secondaryPower.UsePower());
+                m_PowerManager.secondaryPower.ExecutePower();
             }
         }
         else if (m_PowerManager.movementPower && Input.GetKeyDown(m_PowerManager.movementPowerKey))
         {
             if (m_Player.UseEnergy(m_PowerManager.movementPower.powerConfig.energyCost) && m_PowerManager.movementPower.canUsePower)
             {
-                StartCoroutine(m_PowerManager.movementPower.UsePower());
+                m_PowerManager.movementPower.ExecutePower();
             }
         }
         else if (m_PowerManager.defensivePower && Input.GetKeyDown(m_PowerManager.defensivePowerKey))
         {
             if (m_Player.UseEnergy(m_PowerManager.defensivePower.powerConfig.energyCost) && m_PowerManager.defensivePower.canUsePower)
             {
-                StartCoroutine(m_PowerManager.defensivePower.UsePower());
+                m_PowerManager.defensivePower.ExecutePower();
             }
         }
     }
@@ -112,6 +113,30 @@ public class PlayerController : MonoBehaviour
         Vector2 playerVelocity = Vector2.right * m_Player.maxSpeed * horz;
         Vector2 currentVel = new Vector2(playerVelocity.x, m_rigidbody.velocity.y);
         m_rigidbody.velocity = currentVel;
+
+        //Try working with forces to get friction?
+    /*
+        Vector2 velocity = m_rigidbody.velocity;
+
+        //No input, slowdown
+        if (horz == 0.0f && Mathf.Abs(velocity.x) > float.Epsilon)
+        {
+            m_rigidbody.AddForce(new Vector2(-Mathf.Sign(m_rigidbody.velocity.x) * 10f, 0f));
+           // m_rigidbody.velocity = new Vector2(0f, velocity.y);
+        }
+        if (m_Player.grounded)
+        {
+            m_rigidbody.AddForce(new Vector2(horz * 12f, 0));
+        }
+        else
+        {
+            m_rigidbody.AddForce(new Vector2(horz * 1f, 0));
+        }
+
+        //Clamp player speed in x direction (if diagonal surface, must clamp x and y
+        m_rigidbody.velocity = new Vector2(Mathf.Clamp(velocity.x, -m_Player.maxSpeed, m_Player.maxSpeed), velocity.y);
+    
+    */
     }
 
     void Jump()

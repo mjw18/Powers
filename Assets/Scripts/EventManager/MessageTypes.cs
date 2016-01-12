@@ -88,4 +88,19 @@ namespace ExtendedEvents
             usageModeOfSlot = usageMode;
         }
     }
+
+
+    public class ApplyDamageMessage : MessageInfo
+    {
+        public int entityID;
+        public float damage;
+        public float duration;
+
+        public ApplyDamageMessage(int ID, float damage, float duration)
+        {
+            this.entityID = ID;
+            this.damage = damage;
+            this.duration = duration;
+        }
+    }
 }
