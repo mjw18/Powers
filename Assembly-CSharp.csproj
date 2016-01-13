@@ -62,6 +62,7 @@
      <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\EnergyCrystalDefensive.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\EnergyCrystalSecondary.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\FreeCrystalObject.cs" />
+     <Compile Include="Assets\Scripts\Entity\Powers\EnergyCrystalPower\WallCrystalObject.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\DischargeBlast.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\HandLaser.cs" />
      <Compile Include="Assets\Scripts\Entity\Powers\HandLaserPower\LaserDefensiive.cs" />

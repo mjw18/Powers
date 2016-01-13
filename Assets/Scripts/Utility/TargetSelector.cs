@@ -23,6 +23,7 @@ public class TargetSelector : MonoBehaviour {
 
     public float maxRange;
 
+    //These arent useful as they are
     public float singleTargetRadius;
     public float radius = 0.1f;
 
@@ -48,8 +49,8 @@ public class TargetSelector : MonoBehaviour {
 
         //Selector radius sets size of circle cast and targeted trigger
         radius = m_Power.powerConfig.effectRadius;
-        m_Selector.radius = radius;
-
+        ResizeSelector(radius); ;
+        
         //Set target selector range to power range
         maxRange = m_Power.powerConfig.range;
 
@@ -105,7 +106,7 @@ public class TargetSelector : MonoBehaviour {
     protected void SetLineBounds()
     {
         m_LineRenderer.SetPosition(0, origin);
-        m_LineRenderer.SetPosition(1, transform.position);
+        m_LineRenderer.SetPosition(1, m_Transform.position);
     }
 
     //Resize selector, if input is empty then radius is set to initial radius
@@ -122,9 +123,10 @@ public class TargetSelector : MonoBehaviour {
         if (targets.Count > 0) targets.Clear();
 
         //Circle cast at target position
-        Collider2D[] cols = Physics2D.OverlapCircleAll(m_Transform.position, radius);
+        Collider2D[] cols = Physics2D.OverlapCircleAll(m_Transform.position, m_Selector.radius);
         foreach (Collider2D col in cols)
         {
+            Debug.Log(m_Selector.radius);
             //Cast against targetable objects
             if((col.CompareTag(Tags.enemy) || col.CompareTag(Tags.interactable) ) && col.gameObject != gameObject)
             {
@@ -132,7 +134,7 @@ public class TargetSelector : MonoBehaviour {
             }
         }
 
-        foreach(var rayHit in Physics2D.RaycastAll(origin, transform.position - (Vector3)origin, maxRange))
+        foreach(var rayHit in Physics2D.RaycastAll(origin, m_Transform.position - (Vector3)origin, maxRange))
         {
             Collider2D col = rayHit.collider;
             if((col.CompareTag(Tags.enemy) || col.CompareTag(Tags.interactable)) && col.gameObject != gameObject)

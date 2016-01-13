@@ -8,8 +8,8 @@ using System.Collections.Generic;
 //      with cooldown timer Mono object
 
 //Consider virtual "CanHitTarget" Function that does not allow selection of unreachable targets
-public class Power : MonoBehaviour {
-
+public class Power : MonoBehaviour
+{
     //Which Execute function of the power should be used
     public enum PowerUsageMode
     {
@@ -173,21 +173,6 @@ public class Power : MonoBehaviour {
                 break;
             default:
                 Debug.Log("Visual Effect Placement not set");
-                break;
-        }
-    }
-
-    public void DamageTarget()
-    {
-        switch (powerConfig.damageType)
-        {
-            case DamageType.SingleTarget:
-            case DamageType.SingleTargetDuration:
-                Debug.Log("SingleTargetAcquisition");
-                break;
-            case DamageType.AreaEffect:
-            case DamageType.AreaEffectDuration:
-                Debug.Log("AreaEffectTargetAcuisition");
                 break;
         }
     }

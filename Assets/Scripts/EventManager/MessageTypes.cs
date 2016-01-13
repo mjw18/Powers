@@ -92,15 +92,25 @@ namespace ExtendedEvents
 
     public class ApplyDamageMessage : MessageInfo
     {
-        public int entityID;
-        public float damage;
-        public float duration;
+        public int entityID { get; private set; }
+        public float damage { get; private set; }
+        public float duration { get; private set; }
 
         public ApplyDamageMessage(int ID, float damage, float duration)
         {
             this.entityID = ID;
             this.damage = damage;
             this.duration = duration;
+        }
+    }
+
+    public class DischargeHitMessage : MessageInfo
+    {
+        public int entityID { get; private set; }
+
+        public DischargeHitMessage(int ID)
+        {
+            this.entityID = ID;
         }
     }
 }

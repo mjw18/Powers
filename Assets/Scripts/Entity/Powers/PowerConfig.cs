@@ -5,6 +5,7 @@ public class PowerConfig : ScriptableObject
 {
     public float damage;
     public DamageType damageType;
+    public TargetType targetType;
     public float duration;
     public float energyCost;
     public float range;
@@ -22,7 +23,15 @@ public class PowerConfig : ScriptableObject
     public AbilityVisualEffect[] visualEffects;
 }
 
+//The different damage types. Used for immunities and powers
 public enum DamageType
+{
+    Physical,
+    Energy
+}
+
+//Targeting types
+public enum TargetType
 {
     SingleTarget,
     SingleTargetDuration,
