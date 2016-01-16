@@ -4,6 +4,8 @@ using System.Collections;
 public class Regulator : MonoBehaviour {
 
     public float waitTime;
+    public bool useGameTime = false;
+
     //public bool canUse = true;
     private float m_startTime;
     private float m_timer = 0f;
@@ -38,6 +40,12 @@ public class Regulator : MonoBehaviour {
     //Udate Timer Independent of Time.timescale
     void UpdateTimer()
     {
+        if(useGameTime)
+        {
+            m_timer += Time.deltaTime;
+            return;
+        }
+
         float currentTime = Time.realtimeSinceStartup;
         m_timer += currentTime - m_lastTime;
         m_lastTime = currentTime;
@@ -48,6 +56,13 @@ public class Regulator : MonoBehaviour {
     {
         //Cant start a running timer
         if (m_timing) return;
+
+        if(useGameTime)
+        {
+            m_timer = 0f;
+            m_timing = true;
+            return;
+        }
 
         m_startTime = Time.realtimeSinceStartup;
         m_timer = 0f;

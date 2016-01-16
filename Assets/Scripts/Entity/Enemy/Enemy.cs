@@ -24,7 +24,7 @@ public class Enemy : Agent
 	}
 
     //Deal specified damage to enemy, kill if health below 0
-    public override void ApplyDamage(float damage)
+    public override void ApplyDamage(float damage, DamageType damageType)
     {
         StartCoroutine(MoveHealthBar(damage));
 

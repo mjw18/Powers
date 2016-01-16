@@ -13,7 +13,7 @@ public class KillBox : MonoBehaviour {
         {
             //Change This is stupid
             //GroundCheck hits first so we have to look in parent
-            other.gameObject.GetComponentInParent<Player>().ApplyDamage(100f);
+            other.gameObject.GetComponentInParent<Player>().ApplyDamage(100f, DamageType.Physical);
         }
     }
 }

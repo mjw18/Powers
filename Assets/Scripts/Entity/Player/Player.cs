@@ -99,9 +99,9 @@ public class Player : Agent
         
     }
 
-    public override void ApplyDamage(float damage)
+    public override void ApplyDamage(float damage, DamageType damageType)
     {
-        base.ApplyDamage(damage);
+        base.ApplyDamage(damage, damageType);
 
         //Animation/messaging?
     }
